@@ -5,7 +5,7 @@
 int main()
 {
     /* HW1 */
-    /*{
+    {
     const char* hw1_in = "./data/lena512.bmp";
     const char* hw1_out_nearest = "./output/lena512_nearest.bmp";
     const char* hw1_out_bilinear = "./output/lena512_bilinear.bmp";
@@ -22,10 +22,10 @@ int main()
     free_ptr(bilinear_interpolation);
     free_ptr(bicubic_interpolation);
     free_ptr(reader);
-    }*/
+    }
 
     /* HW2 */
-    /*{
+    {
     const char* hw2_in = "./data/data2.bmp";
     const char* hw2_out = "./output/data2_processed.bmp";
     BmpImage* reader = read(hw2_in);
@@ -33,10 +33,10 @@ int main()
     save(hw2_out, histogram_interpolation);
     free_ptr(histogram_interpolation);
     free_ptr(reader);
-    }*/
+    }
 
     /* HW3 */
-    /*{
+    {
     const char* hw3_in = "./data/girl256-pepper-salt.bmp";
     const char* hw3_out_1_3 = "./output/girl256-pepper-salt_processed(median-kernel=3).bmp";
     const char* hw3_out_1_5 = "./output/girl256-pepper-salt_processed(median-kernel=5).bmp";
@@ -78,10 +78,10 @@ int main()
     save(hw3_out_2_6, Gaussian);
     free_ptr(Gaussian);
     free_ptr(reader);
-    }*/
+    }
 
     /* HW4 */
-    /*{
+    {
     const char* hw4_in = "./data/data4.bmp";
     const char* hw4_out = "./output/data4_processed.bmp";
     BmpImage* reader = read(hw4_in);
@@ -89,11 +89,11 @@ int main()
     save(hw4_out, histogram_interpolation);
     free_ptr(histogram_interpolation);
     free_ptr(reader); 
-    }*/
+    }
 
 
     /* HW5 */
-    /*{
+    {
     const char* hw5_in = "./data/lena512.bmp";
     const char* hw5_out = "./output/lena512_freq.bmp";
     BmpImage* reader = read(hw5_in);
@@ -101,67 +101,7 @@ int main()
     save(hw5_out, fft_pointer);
     free_ptr(fft_pointer);
     free_ptr(reader);
-    }*/
-    /*int32_t length = 10;
-    int32_t idx_pow = 0;
-    double_t length_d = length;
-    idx_pow = 0;
-    for (; length_d > 1; )
-    {
-        length_d *= 0.5;
-        idx_pow++;
     }
-    int32_t ptr_power_idx = pow(2, idx_pow);
-    printf("%d\n\n\n", ptr_power_idx);
-    Complex* data_ptr = (Complex*)malloc(sizeof(Complex));
-    Complex* windows = fft_windows(ptr_power_idx);
-    for (int i = 0; i < ptr_power_idx>>1; i++)
-        printf("%f,%f\n", *(windows->real + i), *(windows->imag + i));
-
-    data_ptr->real = (double_t*)malloc(sizeof(double_t) * length);
-    data_ptr->imag = (double_t*)malloc(sizeof(double_t) * length);
-    for (int i = 0; i < length; i++)
-    {
-        *(data_ptr->real + i) = i;
-        *(data_ptr->imag + i) = 0;
-    }
-    Complex* out_ptr_0 = fft1d(data_ptr, length, windows);
-    for (int i = 0; i < ptr_power_idx; i++)
-        printf("%f,%f\n", *(out_ptr_0->real + i), *(out_ptr_0->imag + i));*/
-    Complex* data_ptr = (Complex*)malloc(sizeof(Complex));
-    int32_t height, width;
-    int32_t* dimension = (int32_t*)malloc(sizeof(int32_t) * 2);
-   
-    height = 4;
-    width = 6;
-    int32_t length = height * width;
-    data_ptr->real = (double_t*)malloc(sizeof(double_t) * length);
-    data_ptr->imag = (double_t*)malloc(sizeof(double_t) * length);
-    for (int i = 0; i < length; i++)
-    {
-        if (0 == i % width && i != 0)
-        {
-            printf("\n");
-        }
-        *(data_ptr->real + i) = i;
-        *(data_ptr->imag + i) = -i;
-        printf("%f,%f\t", *(data_ptr->real + i), *(data_ptr->imag + i));
-        
-    }
-    printf("\n\n\n");
-    *(dimension) = height;
-    *(dimension + 1) = width;
-    Complex* data_ptr_1 =fftshift(data_ptr, 2, dimension);
-    for (int i = 0; i < length; i++)
-    {
-        if (0 == i % width && i != 0)
-        {
-            printf("\n");
-        }
-        printf("%f,%f\t", *(data_ptr_1->real + i), *(data_ptr_1->imag + i));
-        
-    }
-  
 
 }
 

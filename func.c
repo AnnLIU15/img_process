@@ -870,70 +870,89 @@ void free_HSI(HSIInfo* data_ptr)
 
 /* HW5 */
 
-//BmpImage* fft(const BmpImage* data_ptr) 
-//{
-//	int32_t i, j, m, n;
-//	BmpImage* freq_ptr = copyBmpImagePtr(data_ptr, 1);
-//	int32_t width = data_ptr->info_header->bi_width;
-//	int32_t height = data_ptr->info_header->bi_height;
-//	// Normalization constant
-//	int32_t idx = height * width;
-//
-//	double_t norm_constant = 1.0 / idx;
-//	/*Complex* complex_data_ptr = (Complex*)malloc(sizeof(Complex));
-//	complex_data_ptr->real = (double_t*)malloc(sizeof(double_t) * idx);
-//	complex_data_ptr->imag = (double_t*)malloc(sizeof(double_t) * idx);*/
-//
-//
-//	Complex* cur_height = (Complex*)malloc(sizeof(Complex));
-//	cur_height->real = (double_t*)malloc(sizeof(double_t) * height);
-//	cur_height->imag = (double_t*)malloc(sizeof(double_t) * height);
-//	Complex* cur_width = (Complex*)malloc(sizeof(Complex));
-//	cur_width->real = (double_t*)malloc(sizeof(double_t) * width);
-//	cur_width->imag = (double_t*)malloc(sizeof(double_t) * width);
-//	Complex* cur_height_ind = (Complex*)malloc(sizeof(Complex));
-//	Complex* cur_width_ind = (Complex*)malloc(sizeof(Complex));
-//	/*for (i = height - 1; i >= 0; i--)
-//		for (j = width - 1; j >= 0; j--)
-//		{
-//			*(complex_data_ptr->real + i * width + j) = 0;
-//			*(complex_data_ptr->imag + i * width + j) = 0;
-//		}*/
-//	for (j = width - 1; j >= 0; j--)
-//	{
-//		printf("col process:%d\n", j);
-//
-//		for (i = height - 1; i >= 0; i--)
-//		{
-//			*(cur_height->real + i) = pow(-1.0, (double_t)(i)+j) * (double_t) * (freq_ptr->DATA + j * height + i);
-//			*(cur_height->imag + i) = 0;
-//		}
-//		cur_height_ind = fft1d(cur_height, height);
-//		for (i = height - 1; i >= 0; i--)
-//		{
-//			*(freq_ptr->DATA + j * height + i) = *(cur_height_ind->real + i) / height;
-//		}
-//	}
-//	for (i = height - 1; j >= 0; j--)
-//	{
-//		for (j = width - 1; j >= 0; j--)
-//		{
-//			*(cur_width->real + j) = pow(-1.0, (double_t)(i)+j)* (double_t)* (freq_ptr->DATA + i * width + j);
-//			*(cur_width->imag + i) = 0;
-//		}
-//		cur_width_ind = fft1d(cur_width, width);
-//		for (j = width - 1; j >= 0; j--)
-//		{
-//			*(freq_ptr->DATA + i * width + j) = *(cur_width_ind->real + j) / width;
-//		}
-//		printf("row process:%d\n", i);
-//	}
-//
-//	free_complex(cur_height); free_complex(cur_width);
-//	free_complex(cur_height_ind); free_complex(cur_width_ind);
-//	//free_complex(complex_data_ptr);
-//	return freq_ptr;
-//}
+/* fft(dft) out -> normalize_factor * log(abs(fft(padding(data))))
+ * data_ptr(in): data
+ */
+BmpImage* fft(const BmpImage* data_ptr)
+{
+	BmpImage* out_ptr = copyBmpImagePtr(data_ptr, 255);
+	int32_t idx_pow;
+	int32_t i, j;
+	int32_t* dimension = (int32_t*)malloc(sizeof(int32_t) * 2);
+	double_t length_d;
+	Complex* complex_data_ptr = (Complex*)malloc(sizeof(Complex));
+	Complex* fft_out_ptr = NULL;
+	length_d = data_ptr->info_header->bi_height;
+	/* find padding height and width, both of them should be 2^m,2^n 
+	 * I didn't implement  3, 5, 7-base FFT
+	 */
+	idx_pow = 0;
+	for (; length_d > 1; )
+	{
+		length_d *= 0.5;
+		idx_pow++;
+	}
+	out_ptr->info_header->bi_height = pow(2, idx_pow);
+	length_d = data_ptr->info_header->bi_width;
+	idx_pow = 0;
+	for (; length_d > 1; )
+	{
+		length_d *= 0.5;
+		idx_pow++;
+	}
+	out_ptr->info_header->bi_width = pow(2, idx_pow);
+	idx_pow = data_ptr->info_header->bi_height * data_ptr->info_header->bi_width;
+	*dimension = out_ptr->info_header->bi_height;
+	*(dimension+1) = out_ptr->info_header->bi_width;
+	out_ptr->DATA = (uint8_t*)malloc(sizeof(uint8_t) * out_ptr->info_header->bi_height * out_ptr->info_header->bi_width);
+	complex_data_ptr->real = (double_t*)malloc(sizeof(double_t) * idx_pow);
+	complex_data_ptr->imag = (double_t*)malloc(sizeof(double_t) * idx_pow);
+	/* copy data to complex array */
+	for (i = data_ptr->info_header->bi_height - 1; i >= 0; i--)
+	{
+		for (j = data_ptr->info_header->bi_width - 1; j >= 0; j--)
+		{
+			*(complex_data_ptr->real + i * data_ptr->info_header->bi_width + j) =
+				*(data_ptr->DATA + i * data_ptr->info_header->bi_width + j);
+			*(complex_data_ptr->imag + i * data_ptr->info_header->bi_width + j) = 0;
+		}
+	}
+	/* 2d fft */
+	fft_out_ptr = fft2d(complex_data_ptr, data_ptr->info_header->bi_height , data_ptr->info_header->bi_width);
+	free(complex_data_ptr->real); free(complex_data_ptr->imag);
+	/* 2d fftshift */
+	complex_data_ptr = fftshift(fft_out_ptr, 2, dimension);
+	free(fft_out_ptr->imag);
+	length_d = 0;
+	/* find max value */
+	for (i = out_ptr->info_header->bi_height - 1; i >= 0; i--)
+	{
+		for (j = out_ptr->info_header->bi_width - 1; j >= 0; j--)
+		{
+			*(fft_out_ptr->real+ i * out_ptr->info_header->bi_width + j) = log(sqrt(
+				pow(*(complex_data_ptr->real + i * out_ptr->info_header->bi_width + j), 2) +
+				pow(*(complex_data_ptr->imag + i * out_ptr->info_header->bi_width + j), 2)
+			));
+			length_d = length_d < *(fft_out_ptr->real + i * out_ptr->info_header->bi_width + j) ?
+				*(fft_out_ptr->real + i * out_ptr->info_header->bi_width + j) : length_d;
+		}
+	}
+	/* let max value map to 255 */
+	length_d = 255.0 / length_d;
+	/* map double to uint8 */
+	for (i = out_ptr->info_header->bi_height - 1; i >= 0; i--)
+	{
+		for (j = out_ptr->info_header->bi_width - 1; j >= 0; j--)
+		{
+			*(out_ptr->DATA + i * out_ptr->info_header->bi_width + j) = (uint8_t)(length_d* 
+				*(fft_out_ptr->real + i * out_ptr->info_header->bi_width + j)+0.1);
+		}
+	}
+	free(fft_out_ptr->real);
+	free(fft_out_ptr);
+	free_complex(complex_data_ptr);
+	return out_ptr;
+}
 
 BmpImage* dct(const BmpImage* data_ptr)
 {
@@ -944,19 +963,17 @@ BmpImage* dwt(const BmpImage* data_ptr)
 {
 }
 
-
-/* slow transpose
+/* slow transpose(may develop in the future if I remember it)
  * data_ptr(inout): matrix
  * height(in): origin height
  * width(in): dst height
- * conjugate_trans(in): is conjugate
+ * conjugate_trans(in): is conjugate(1->yes,0->normal trans)
  */
 void transpose_complex(Complex* data_ptr, const int32_t height, const int32_t width, const uint8_t conjugate_trans)
 {
 	Complex* out_ptr = (Complex*)malloc(sizeof(Complex));
 	int32_t i, j;
 	int32_t dst_width = height;
-
 	out_ptr->real = (double_t*)malloc(sizeof(double_t) * height * width);
 	out_ptr->imag = (double_t*)malloc(sizeof(double_t) * height * width);
 	for (i = height - 1; i >= 0; i--)
@@ -967,6 +984,7 @@ void transpose_complex(Complex* data_ptr, const int32_t height, const int32_t wi
 			*(out_ptr->imag + j * dst_width + i) = *(data_ptr->imag + i * width + j);
 		}
 	}
+	/* conjugate transpose */
 	if (conjugate_trans == 1)
 	{
 		for (i = height - 1; i >= 0; i--)
@@ -1008,8 +1026,7 @@ Complex* fftshift(const Complex* data_ptr, const uint8_t dimension, int32_t* dim
 	}
 	else
 	{
-		/* *(dimension_length + 1) -> width *(dimension_length) -> height 
-		 */
+		/* *(dimension_length + 1) -> width *(dimension_length) -> height  */
 		out_ptr = (Complex*)malloc(sizeof(Complex));
 		if (1 == dimension)
 		{
@@ -1059,6 +1076,7 @@ Complex* fftshift(const Complex* data_ptr, const uint8_t dimension, int32_t* dim
 			tmp_ptr = (Complex*)malloc(sizeof(Complex));
 			tmp_ptr->real = (double_t*)malloc(sizeof(double_t) * *(dimension_length + 1));
 			tmp_ptr->imag = (double_t*)malloc(sizeof(double_t) * *(dimension_length + 1));
+			/* fftshift for row elements(like 1d fftshift) */
 			for (i = *(dimension_length)-1; i >= 0; i--)
 			{
 				for (j = *(dimension_length + 1) - 1; j >= 0; j--)
@@ -1078,6 +1096,9 @@ Complex* fftshift(const Complex* data_ptr, const uint8_t dimension, int32_t* dim
 			tmp_ptr->real = (double_t*)malloc(sizeof(double_t) * *(dimension_length));
 			tmp_ptr->imag = (double_t*)malloc(sizeof(double_t) * *(dimension_length));
 			transpose_complex(out_ptr, *(dimension_length), *(dimension_length + 1), 0);
+			/* fftshift for col(Treat each col(the vector) as an element and do the fftshift for these elements) 
+			 * I transpose the matrix and its flow will be same as the fftshift for row
+			 */
 			for (i = *(dimension_length + 1) - 1; i >= 0; i--)
 			{
 				for (j = *(dimension_length) - 1; j >= 0; j--)
@@ -1093,12 +1114,13 @@ Complex* fftshift(const Complex* data_ptr, const uint8_t dimension, int32_t* dim
 				}
 				free_complex(tmp_ptr_1);
 			}
+			/* back to origin matrix */
 			transpose_complex(out_ptr, *(dimension_length + 1), *(dimension_length), 0);
 			free_complex(tmp_ptr);
 		}
 		else
 		{
-			printf("Dimension(%d) is bigger than 2 is not support now! Return NULL pointer!\n", dimension);
+			printf("Dimension(%d) is bigger than 2 which is not supported now! Return NULL pointer!\n", dimension);
 		}
 	}
 	return out_ptr;
@@ -1111,10 +1133,11 @@ Complex* fftshift(const Complex* data_ptr, const uint8_t dimension, int32_t* dim
 Complex* fft2d(const Complex* data_ptr, const int32_t height, const int32_t width)
 {
 	Complex* out_ptr = NULL;
-	Complex* height_ptr = NULL;
-	Complex* width_ptr = NULL;
-	
-	int32_t i, j;
+	Complex* tmp_ptr = NULL;
+	Complex* tmp_ptr_1 = NULL;
+	Complex* wds_ptr = NULL;
+	int32_t i, j, dst_height, dst_width, idx_pow;
+	double_t length_d;
 	if (height <= 0 && width <= 0)
 	{
 		printf("Dimension is lower than 2, please check it! Return NULL pointer!\n");
@@ -1122,20 +1145,89 @@ Complex* fft2d(const Complex* data_ptr, const int32_t height, const int32_t widt
 	else
 	{
 		out_ptr = (Complex*)malloc(sizeof(Complex));
-		height_ptr = (Complex*)malloc(sizeof(Complex));
-		width_ptr = (Complex*)malloc(sizeof(Complex));
-		/*idx_pow = 0;
+		tmp_ptr = (Complex*)malloc(sizeof(Complex));
+		/* (height,width)->(2^(ceil(log2(height))),2^(ceil(log2(width)))) */
+		length_d = height;
+		idx_pow = 0;
 		for (; length_d > 1; )
 		{
 			length_d *= 0.5;
 			idx_pow++;
 		}
-		ptr_power_idx = pow(2, idx_pow);
-		printf("padding from %d->%d\n", ptr_length, ptr_power_idx);*/
+		dst_height = pow(2, idx_pow);
+		length_d = width;
+		idx_pow = 0;
+		for (; length_d > 1; )
+		{
+			length_d *= 0.5;
+			idx_pow++;
+		}
+		dst_width = pow(2, idx_pow);
+		idx_pow = dst_height * dst_width;
+		out_ptr->real = (double_t*)malloc(sizeof(double_t) * idx_pow);
+		out_ptr->imag = (double_t*)malloc(sizeof(double_t) * idx_pow);
+		tmp_ptr->real = (double_t*)malloc(sizeof(double_t) * dst_width);
+		tmp_ptr->imag = (double_t*)malloc(sizeof(double_t) * dst_width);
+		/* padding */
+		for (i = dst_height-1; i >= 0; i--)
+		{
+			for (j = dst_width - 1; j >= 0; j--)
+			{
+				if (j > width - 1 || i > height - 1)
+				{
+					*(out_ptr->real + i * dst_width + j) = 0;
+					*(out_ptr->imag + i * dst_width + j) = 0;
+				}
+				else
+				{
+					*(out_ptr->real + i * dst_width + j) = *(data_ptr->real + i * width + j);
+					*(out_ptr->imag + i * dst_width + j) = *(data_ptr->imag + i * width + j);
+				}
+			}
+		}
+		/* row fft */
+		wds_ptr = fft_windows(dst_width);
+		for (i = dst_height - 1; i >= 0; i--)
+		{
+			for (j = dst_width - 1; j >= 0; j--)
+			{
+				*(tmp_ptr->real + j) = *(out_ptr->real + i * dst_width + j);
+				*(tmp_ptr->imag + j) = *(out_ptr->imag + i * dst_width + j);
+				
+			}
+			tmp_ptr_1 = fft1d(tmp_ptr, dst_width, wds_ptr);
+			for (j = dst_width - 1; j >= 0; j--)
+			{
+				*(out_ptr->real + i * dst_width + j) = *(tmp_ptr_1->real + j);
+				*(out_ptr->imag + i * dst_width + j) = *(tmp_ptr_1->imag + j);
+			}
+			free_complex(tmp_ptr_1);
+		}
+		free_complex(wds_ptr);
+		transpose_complex(out_ptr, dst_height, dst_width, 0);
+		/* col fft */
+		wds_ptr = fft_windows(dst_height);
+		for (i = dst_width - 1; i >= 0; i--)
+		{
+			for (j = dst_height - 1; j >= 0; j--)
+			{
+				*(tmp_ptr->real + j) = *(out_ptr->real + i * dst_height +j);
+				*(tmp_ptr->imag + j) = *(out_ptr->imag + i * dst_height +j);
+			}
+			tmp_ptr_1 = fft1d(tmp_ptr, dst_height, wds_ptr);
+			for (j = dst_height - 1; j >= 0; j--)
+			{
+				*(out_ptr->real + i * dst_height +j) = *(tmp_ptr_1->real + j);
+				*(out_ptr->imag + i * dst_height +j) = *(tmp_ptr_1->imag + j);
+			}
+			free_complex(tmp_ptr_1);
+		}
+		transpose_complex(out_ptr, dst_width, dst_height, 0);
+		free_complex(tmp_ptr);
+		free_complex(wds_ptr);
 	}
 	return out_ptr;
 }
-
 
 /* fft1d 
  * data_ptr(in): data
@@ -1155,6 +1247,7 @@ Complex* fft1d(const Complex* data_ptr, const int32_t ptr_length,const Complex* 
 	}
 	else
 	{
+		/* padding for data */
 		idx_pow = 0;
 		for (; length_d > 1; )
 		{
@@ -1162,7 +1255,6 @@ Complex* fft1d(const Complex* data_ptr, const int32_t ptr_length,const Complex* 
 			idx_pow++;
 		}
 		ptr_power_idx = pow(2, idx_pow);
-		printf("padding from %d->%d\n", ptr_length, ptr_power_idx);
 		out_ptr = (Complex*)malloc(sizeof(Complex));
 		out_ptr->real = (double_t*)malloc(sizeof(double_t) * ptr_power_idx);
 		out_ptr->imag = (double_t*)malloc(sizeof(double_t) * ptr_power_idx);
@@ -1180,7 +1272,7 @@ Complex* fft1d(const Complex* data_ptr, const int32_t ptr_length,const Complex* 
 				*(out_ptr->imag + i) = 0;
 			}
 		}
-		// 位反转置换 Bit-reversal Permutation 这个是正确的
+		// 位反转置换 Bit-reversal Permutation
 		for (i = 0; i < ptr_power_idx; i++)
 		{
 			k = i; l = 0;
@@ -1199,6 +1291,7 @@ Complex* fft1d(const Complex* data_ptr, const int32_t ptr_length,const Complex* 
 				*(out_ptr->imag + l) = timag;
 			}
 		}
+		/* fft calculate */
 		for (i = 2; i <= ptr_power_idx; i = (i << 1))
 		{
 			for (k = 0; k < ptr_power_idx; k += i)
@@ -1238,6 +1331,7 @@ Complex* fft_windows(const int32_t ptr_power_idx)
 	treal = 2 * M_PI / ptr_power_idx;
 	timag = -sin(treal);
 	treal = cos(treal);
+	/* calculate the W_N^k */
 	for (i = 1; i < ptr_power_half; i++)
 	{
 		*(wds_ptr->real + i) = *(wds_ptr->real + i - 1) * treal - *(wds_ptr->imag + i - 1) * timag;
@@ -1255,5 +1349,3 @@ void free_complex(Complex* x)
 	free(x->imag);
 	free(x);
 }
-
-
