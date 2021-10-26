@@ -1095,27 +1095,27 @@ Complex* fftshift(const Complex* data_ptr, const uint8_t dimension, int32_t* dim
 			free(tmp_ptr->real); free(tmp_ptr->imag);
 			tmp_ptr->real = (double_t*)malloc(sizeof(double_t) * *(dimension_length));
 			tmp_ptr->imag = (double_t*)malloc(sizeof(double_t) * *(dimension_length));
-			transpose_complex(out_ptr, *(dimension_length), *(dimension_length + 1), 0);
+			// transpose_complex(out_ptr, *(dimension_length), *(dimension_length + 1), 0);
 			/* fftshift for col(Treat each col(the vector) as an element and do the fftshift for these elements) 
 			 * I transpose the matrix and its flow will be same as the fftshift for row
 			 */
-			for (i = *(dimension_length + 1) - 1; i >= 0; i--)
+			for (i = *(dimension_length)- 1; i >= 0; i--)
 			{
-				for (j = *(dimension_length) - 1; j >= 0; j--)
+				for (j =  * (dimension_length + 1) - 1; j >= 0; j--)
 				{
-					*(tmp_ptr->real + j) = *(out_ptr->real + i * *(dimension_length) + j);
-					*(tmp_ptr->imag + j) = *(out_ptr->imag + i * *(dimension_length) + j);
+					*(tmp_ptr->real + j) = *(out_ptr->real + i + j * *(dimension_length));
+					*(tmp_ptr->imag + j) = *(out_ptr->imag + i + j * *(dimension_length));
 				}
 				tmp_ptr_1 = fftshift(tmp_ptr, 1, (dimension_length));
-				for (j = *(dimension_length) - 1; j >= 0; j--)
+				for (j = *(dimension_length + 1) - 1; j >= 0; j--)
 				{
-					*(out_ptr->real + i * *(dimension_length) + j) = *(tmp_ptr_1->real + j);
-					*(out_ptr->imag + i * *(dimension_length) + j) = *(tmp_ptr_1->imag + j);
+					*(out_ptr->real + i + j * *(dimension_length)) = *(tmp_ptr_1->real + j);
+					*(out_ptr->imag + i + j * *(dimension_length)) = *(tmp_ptr_1->imag + j);
 				}
 				free_complex(tmp_ptr_1);
 			}
 			/* back to origin matrix */
-			transpose_complex(out_ptr, *(dimension_length + 1), *(dimension_length), 0);
+			// transpose_complex(out_ptr, *(dimension_length + 1), *(dimension_length), 0);
 			free_complex(tmp_ptr);
 		}
 		else
@@ -1204,25 +1204,25 @@ Complex* fft2d(const Complex* data_ptr, const int32_t height, const int32_t widt
 			free_complex(tmp_ptr_1);
 		}
 		free_complex(wds_ptr);
-		transpose_complex(out_ptr, dst_height, dst_width, 0);
+		// transpose_complex(out_ptr, dst_height, dst_width, 0);
 		/* col fft */
 		wds_ptr = fft_windows(dst_height);
-		for (i = dst_width - 1; i >= 0; i--)
+		for (i = dst_height - 1; i >= 0; i--)
 		{
-			for (j = dst_height - 1; j >= 0; j--)
+			for (j = dst_width - 1; j >= 0; j--)
 			{
-				*(tmp_ptr->real + j) = *(out_ptr->real + i * dst_height +j);
-				*(tmp_ptr->imag + j) = *(out_ptr->imag + i * dst_height +j);
+				*(tmp_ptr->real + j) = *(out_ptr->real + i + j * dst_height);
+				*(tmp_ptr->imag + j) = *(out_ptr->imag + i + j * dst_height);
 			}
 			tmp_ptr_1 = fft1d(tmp_ptr, dst_height, wds_ptr);
-			for (j = dst_height - 1; j >= 0; j--)
+			for (j = dst_width - 1; j >= 0; j--)
 			{
-				*(out_ptr->real + i * dst_height +j) = *(tmp_ptr_1->real + j);
-				*(out_ptr->imag + i * dst_height +j) = *(tmp_ptr_1->imag + j);
+				*(out_ptr->real + i + j * dst_height) = *(tmp_ptr_1->real + j);
+				*(out_ptr->imag + i + j * dst_height) = *(tmp_ptr_1->imag + j);
 			}
 			free_complex(tmp_ptr_1);
 		}
-		transpose_complex(out_ptr, dst_width, dst_height, 0);
+		// transpose_complex(out_ptr, dst_width, dst_height, 0);
 		free_complex(tmp_ptr);
 		free_complex(wds_ptr);
 	}
