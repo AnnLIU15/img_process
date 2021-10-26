@@ -12,13 +12,13 @@ BmpImage* read(const char* img_path)
 	data_ptr->info_header = (BITMAPINFOHEADER*)malloc(sizeof(BITMAPINFOHEADER));
 	int32_t i;
 	int32_t src_height, src_width, offset_address;
-	int64_t equal_width,equal_offset_address;
+	int64_t equal_width, equal_offset_address;
 	uint8_t* offset_data;
 	FILE* file_ptr = fopen(img_path, "rb");
 	printf("Reading path: %s\n", img_path);
 	fread(data_ptr->file_header, sizeof(BITMAPFILEHEADER), 1, file_ptr);
 	fread(data_ptr->info_header, sizeof(BITMAPINFOHEADER), 1, file_ptr);
-	if ((!file_ptr)|| data_ptr->file_header->bf_type != 19778)
+	if ((!file_ptr) || data_ptr->file_header->bf_type != 19778)
 	{
 		printf("It is not BMP file or haven't open file! Please check your input!\n");
 		exit(-10);
@@ -38,7 +38,7 @@ BmpImage* read(const char* img_path)
 			offset_data = (uint8_t*)malloc(sizeof(uint8_t) * offset_address);
 			for (i = src_height - 1; i >= 0; i--)
 			{
-				fread((uint8_t*)(data_ptr->DATA +  i * src_width), sizeof(uint8_t), src_width, file_ptr);
+				fread((uint8_t*)(data_ptr->DATA + i * src_width), sizeof(uint8_t), src_width, file_ptr);
 				if (offset_address != 4)
 				{
 					fread(offset_data, sizeof(uint8_t), offset_address, file_ptr);
@@ -56,7 +56,7 @@ BmpImage* read(const char* img_path)
 			offset_data = (uint8_t*)malloc(sizeof(uint8_t) * equal_offset_address);
 			for (i = src_height - 1; i >= 0; i--)
 			{
-				fread((uint8_t*)(data_ptr->DATA +  i * equal_width),
+				fread((uint8_t*)(data_ptr->DATA + i * equal_width),
 					sizeof(uint8_t), equal_width, file_ptr);
 				if (offset_address != 4)
 				{
@@ -96,7 +96,7 @@ void free_ptr(BmpImage* data_ptr)
  */
 BmpImage* copyBmpImagePtr(const BmpImage* data_ptr, const uint8_t copy_data)
 {
-	 /* file_header */
+	/* file_header */
 	int32_t i, j;
 	BmpImage* new_ptr = (BmpImage*)malloc(sizeof(BmpImage));
 	new_ptr->file_header = (BITMAPFILEHEADER*)malloc(sizeof(BITMAPFILEHEADER));
@@ -127,7 +127,7 @@ BmpImage* copyBmpImagePtr(const BmpImage* data_ptr, const uint8_t copy_data)
 	{
 		if (copy_data != 255)
 		{
-			new_ptr->DATA = (uint8_t*)malloc(sizeof(uint8_t) * new_ptr->info_header->bi_width 
+			new_ptr->DATA = (uint8_t*)malloc(sizeof(uint8_t) * new_ptr->info_header->bi_width
 				* new_ptr->info_header->bi_height * 3);
 			for (i = new_ptr->info_header->bi_height - 1; i >= 0; i--)
 			{
@@ -174,7 +174,7 @@ void copyBmpImageInfo(const BmpImage* data_ptr, BmpImage* new_ptr)
 	new_ptr->info_header->bi_width = data_ptr->info_header->bi_width;
 	new_ptr->info_header->bi_x_pels_per_meter = data_ptr->info_header->bi_x_pels_per_meter;
 	new_ptr->info_header->bi_y_pels_per_meter = data_ptr->info_header->bi_y_pels_per_meter;
-	
+
 }
 
 /* write the file
@@ -184,8 +184,8 @@ void copyBmpImageInfo(const BmpImage* data_ptr, BmpImage* new_ptr)
 void save(const char* save_path, BmpImage* data_ptr)
 {
 	FILE* file_ptr = fopen(save_path, "wb");
-	int32_t offset_address = 0; 
-	uint8_t* offset_data ;
+	int32_t offset_address = 0;
+	uint8_t* offset_data;
 	int32_t dst_height = data_ptr->info_header->bi_height;
 	int32_t dst_width = data_ptr->info_header->bi_width;
 	int32_t symmetry_width = (dst_width * 8 + 31) >> 5 << 2;
@@ -197,7 +197,7 @@ void save(const char* save_path, BmpImage* data_ptr)
 		printf("Can't create the bmp file!\n");
 		exit(-12);
 	}
-	else if(8 == data_ptr->info_header->bi_bit_count)
+	else if (8 == data_ptr->info_header->bi_bit_count)
 	{
 		/* 4-byte symmetry
 		 * 32bits -> 4Bytes
@@ -216,10 +216,10 @@ void save(const char* save_path, BmpImage* data_ptr)
 		offset_data = (uint8_t*)malloc(sizeof(uint8_t) * offset_address);
 		for (i = offset_address - 1; i >= 0; i--)
 			*(offset_data + i) = 0;
-		for (i = dst_height-1; i >=0 ; i--)
+		for (i = dst_height - 1; i >= 0; i--)
 		{
-			
-			fwrite((data_ptr->DATA +  i * dst_width), sizeof(uint8_t), dst_width, file_ptr);
+
+			fwrite((data_ptr->DATA + i * dst_width), sizeof(uint8_t), dst_width, file_ptr);
 			if (offset_address != 4)
 				fwrite(offset_data, sizeof(uint8_t), offset_address, file_ptr);
 			else
@@ -321,15 +321,15 @@ void biCubic(float_t* rt_value)
 
 /* interpolation
  * data_ptr(in): origin image
- * type_interpolation(in): which type interpolation you want to use 
- 		0 -> nearest 
- 		1 -> bilinear
- 		else bicubic
+ * type_interpolation(in): which type interpolation you want to use
+		0 -> nearest
+		1 -> bilinear
+		else bicubic
  * scale_factor(in): scale factor of image from (H_component,W)->(H_component*factor,W*factor)
  */
 BmpImage* interpolation(const BmpImage* data_ptr, const uint8_t type_interpolation, const float scale_factor)
 {
-	BmpImage* dst_data_ptr = copyBmpImagePtr(data_ptr,255);
+	BmpImage* dst_data_ptr = copyBmpImagePtr(data_ptr, 255);
 	float_t times;
 	int32_t src_height, src_width, dst_height, dst_width;
 	int32_t i, j;
@@ -357,9 +357,9 @@ BmpImage* interpolation(const BmpImage* data_ptr, const uint8_t type_interpolati
 		{
 			/* 0 stands for Nearest neighbor interpolation 最邻近插值 */
 			printf("Making Nearest neighbor interpolation,time_x=%f,time_y=%f\n", scale_factor, scale_factor);
-			
-			for (i = dst_height-1; i>=0 ; i--)
-				for (j = dst_width-1; j >=0 ; j--)
+
+			for (i = dst_height - 1; i >= 0; i--)
+				for (j = dst_width - 1; j >= 0; j--)
 				{
 					x0 = (int32_t)round((double_t)times * i - 1e-10);
 					y0 = (int32_t)round((double_t)times * j - 1e-10);
@@ -400,7 +400,7 @@ BmpImage* interpolation(const BmpImage* data_ptr, const uint8_t type_interpolati
 						d = *(data_ptr->DATA + (x0 + 1) * src_width + y0 + 1);
 					}
 					*(dst_data_ptr->DATA + i * dst_width + j) = (uint8_t)(a * (1 - u) * (1 - v) + b * u * (1 - v) +
-						c * v * (1 - u) + u * v * d+0.001);
+						c * v * (1 - u) + u * v * d + 0.001);
 				}
 		}
 		else
@@ -431,7 +431,7 @@ BmpImage* interpolation(const BmpImage* data_ptr, const uint8_t type_interpolati
 							}
 							dy_cubic = (float_t)(idx_col - v);
 							biCubic(&dy_cubic);
-							
+
 							pixel += (double_t)(*(data_ptr->DATA + (x0 + idx_row) * src_width + y0 + idx_col))
 								* ((double_t)dx_cubic * dy_cubic);
 
@@ -443,7 +443,7 @@ BmpImage* interpolation(const BmpImage* data_ptr, const uint8_t type_interpolati
 		}
 	}
 	printf("Finish interpolated from(%d,%d) to (%d,%d)\n", data_ptr->info_header->bi_height,
-		data_ptr->info_header->bi_width,dst_data_ptr->info_header->bi_height, dst_data_ptr->info_header->bi_width);
+		data_ptr->info_header->bi_width, dst_data_ptr->info_header->bi_height, dst_data_ptr->info_header->bi_width);
 
 	return dst_data_ptr;
 }
@@ -455,7 +455,7 @@ BmpImage* interpolation(const BmpImage* data_ptr, const uint8_t type_interpolati
  */
 BmpImage* histogramEqualization(const BmpImage* data_ptr)
 {
-	BmpImage* dst_data_ptr = copyBmpImagePtr(data_ptr,0);
+	BmpImage* dst_data_ptr = copyBmpImagePtr(data_ptr, 0);
 	int32_t width = dst_data_ptr->info_header->bi_width;
 	int32_t height = dst_data_ptr->info_header->bi_height;
 	int32_t pixel_number = width * height;
@@ -464,7 +464,7 @@ BmpImage* histogramEqualization(const BmpImage* data_ptr)
 	double_t gray_gray_distribution[256];
 	int32_t i, j;
 	HSIInfo* hsi_ptr = NULL;
-	uint8_t* tmp_data = (uint8_t*)malloc(sizeof(uint8_t) * width * height );
+	uint8_t* tmp_data = (uint8_t*)malloc(sizeof(uint8_t) * width * height);
 	/* initialize array */
 	for (i = 255; i >= 0; i--)
 	{
@@ -477,14 +477,14 @@ BmpImage* histogramEqualization(const BmpImage* data_ptr)
 		for (i = height - 1; i >= 0; i--)
 			for (j = width - 1; j >= 0; j--)
 				*(tmp_data + i * width + j) = *(data_ptr->DATA + i * width + j);
-		
+
 	}
 	else if (24 == data_ptr->info_header->bi_bit_count) // 3 channel
 	{
 		hsi_ptr = bgr2hsi(data_ptr);
 		for (i = height - 1; i >= 0; i--)
 			for (j = width - 1; j >= 0; j--)
-				*(tmp_data + i * width + j) = round(*(hsi_ptr->I_component + i * width + j) * 255.0 );
+				*(tmp_data + i * width + j) = round(*(hsi_ptr->I_component + i * width + j) * 255.0);
 	}
 	else
 	{
@@ -504,7 +504,7 @@ BmpImage* histogramEqualization(const BmpImage* data_ptr)
 	for (i = 254; i >= 0; i--)
 	{
 		j = 255 - i;
-		gray_gray_distribution[j] = gray_gray_distribution[j - 1]+ gray_prob_equal[j]; 
+		gray_gray_distribution[j] = gray_gray_distribution[j - 1] + gray_prob_equal[j];
 	}
 	for (i = 255; i >= 0; i--)
 		gray_prob_equal[i] = round(255 * gray_gray_distribution[i]);
@@ -516,12 +516,12 @@ BmpImage* histogramEqualization(const BmpImage* data_ptr)
 				*(dst_data_ptr->DATA + i * width + j)
 				= (uint8_t)gray_prob_equal[*(tmp_data + i * width + j)];
 	}
-	else if(24 == data_ptr->info_header->bi_bit_count) // 3 channel
+	else if (24 == data_ptr->info_header->bi_bit_count) // 3 channel
 	{
 		for (i = height - 1; i >= 0; i--)
 			for (j = width - 1; j >= 0; j--)
 				*(hsi_ptr->I_component + i * width + j)
-				= ((uint8_t)gray_prob_equal[*(tmp_data + i * width + j)])/255.0;
+				= ((uint8_t)gray_prob_equal[*(tmp_data + i * width + j)]) / 255.0;
 		hsi2bgr(dst_data_ptr, hsi_ptr);
 		free_HSI(hsi_ptr);
 	}
@@ -543,13 +543,13 @@ void sort_array(uint8_t* data_array, const uint64_t length)
 {
 	uint8_t processed = 1;
 	int32_t largest_position = 0;
-	uint8_t tmp_data = 0; 
+	uint8_t tmp_data = 0;
 	int32_t i, j;
-	for (i = length - 1; i > 0 ; i--)
+	for (i = length - 1; i > 0; i--)
 	{
 		processed = 0;
 		largest_position = i;
-		for (j = i - 1; j >=0; j--)
+		for (j = i - 1; j >= 0; j--)
 		{
 			if (*(data_array + largest_position) < *(data_array + j))
 			{
@@ -557,7 +557,7 @@ void sort_array(uint8_t* data_array, const uint64_t length)
 				processed = 1;
 			}
 		}
-		if (processed==1)
+		if (processed == 1)
 		{
 			tmp_data = *(data_array + largest_position);
 			*(data_array + largest_position) = *(data_array + i);
@@ -578,7 +578,7 @@ void sort_array(uint8_t* data_array, const uint64_t length)
 */
 BmpImage* medianFilter(const BmpImage* data_ptr, const int32_t kernel_size)
 {
-	BmpImage* dst_data_ptr = copyBmpImagePtr(data_ptr,0);
+	BmpImage* dst_data_ptr = copyBmpImagePtr(data_ptr, 0);
 	const int32_t src_width = dst_data_ptr->info_header->bi_width;
 	const int32_t src_height = dst_data_ptr->info_header->bi_height;
 	const int32_t edge_size = (int32_t)((kernel_size - 1.0) / 2);
@@ -603,17 +603,17 @@ BmpImage* medianFilter(const BmpImage* data_ptr, const int32_t kernel_size)
 	{
 		printf("kernel_size(%d) should be odd, return the no processed pictures\n", kernel_size);
 	}
-	else 
+	else
 	{
 		/* 填充 */
 		padding_matrix = (uint8_t*)malloc(sizeof(uint8_t) * dst_width * dst_height);
 		printf("Pic padding from (%d,%d)->(%d,%d)\n", src_height, src_width, dst_height, dst_width);
-		
-		for ( i = dst_height-1; i >=0 ; i--)
-			for ( j = dst_width-1; j >=0 ; j--)
+
+		for (i = dst_height - 1; i >= 0; i--)
+			for (j = dst_width - 1; j >= 0; j--)
 				*(padding_matrix + i * dst_width + j) = 0;
-		for (i = src_height-1; i >= 0; i--)
-			for (j = src_width-1; j >= 0; j--)
+		for (i = src_height - 1; i >= 0; i--)
+			for (j = src_width - 1; j >= 0; j--)
 				*(padding_matrix + (i + edge_size) * dst_width + j + edge_size)
 				= *(data_ptr->DATA + src_width * i + j);
 		// 声明核
@@ -748,7 +748,7 @@ BmpImage* GaussianLowPassFilter(const BmpImage* data_ptr, const int32_t kernel_s
 								*(padding_matrix + (i + k) * dst_width + j + l)
 								* (*(GaussianTemplate + k * kernel_size + l));
 						}
-					*(dst_data_ptr->DATA + i * src_width + j) = (uint8_t)(sum_of_GaussianTemplate+0.01);
+					*(dst_data_ptr->DATA + i * src_width + j) = (uint8_t)(sum_of_GaussianTemplate + 0.01);
 				}
 			free(padding_matrix);
 			free(GaussianTemplate);
@@ -765,13 +765,13 @@ BmpImage* GaussianLowPassFilter(const BmpImage* data_ptr, const int32_t kernel_s
 HSIInfo* bgr2hsi(const BmpImage* data_ptr)
 {
 	HSIInfo* hsi_ptr = (HSIInfo*)malloc(sizeof(HSIInfo));
-	double_t B, G, R,theta;
+	double_t B, G, R, theta;
 	int32_t i, j;
 	int32_t height = data_ptr->info_header->bi_height;
 	int32_t width = data_ptr->info_header->bi_width;
 	int32_t equal_width = width * 3;
 	int32_t size = height * width;
-	
+
 	hsi_ptr->H_component = (double_t*)malloc(sizeof(double_t) * size);
 	hsi_ptr->S_component = (double_t*)malloc(sizeof(double_t) * size);
 	hsi_ptr->I_component = (double_t*)malloc(sizeof(double_t) * size);
@@ -779,10 +779,10 @@ HSIInfo* bgr2hsi(const BmpImage* data_ptr)
 	{
 		for (j = width - 1; j >= 0; j--)
 		{
-			B = (double_t)*(data_ptr->DATA + i * equal_width + j * 3) / 255.0;
-			G = (double_t) *(data_ptr->DATA + i * equal_width + j * 3 + 1) / 255.0;
-			R = (double_t) *(data_ptr->DATA + i * equal_width + j * 3 + 2) / 255.0;
-			
+			B = (double_t) * (data_ptr->DATA + i * equal_width + j * 3) / 255.0;
+			G = (double_t) * (data_ptr->DATA + i * equal_width + j * 3 + 1) / 255.0;
+			R = (double_t) * (data_ptr->DATA + i * equal_width + j * 3 + 2) / 255.0;
+
 			/* theta = ((R-G)+(R-B))/2
 			 * theta = theta/sqrt((R-G)^2+(R-B)(G-B))
 			 * theta = arccos(theta)
@@ -790,11 +790,11 @@ HSIInfo* bgr2hsi(const BmpImage* data_ptr)
 			theta = ((R - G) + (R - B)) * 0.5;
 			theta = theta / (sqrt(pow((R - G), 2) + (R - B) * (G - B)) + 1e-15);
 			theta = acos(theta);
-			
+
 			*(hsi_ptr->S_component + i * width + j) = 1 - 3.0 * (R <= B ? ((R <= G) ? R : G) : ((B <= G) ? B : G))
-														/ (R + G + B + 1e-15);
-			*(hsi_ptr->H_component + i * width + j) = abs(*(hsi_ptr->S_component + i * width + j)) < 1e-10 ? 0 : ((G >= B) 
-														? theta : 2 * M_PI - theta);
+				/ (R + G + B + 1e-15);
+			*(hsi_ptr->H_component + i * width + j) = abs(*(hsi_ptr->S_component + i * width + j)) < 1e-10 ? 0 : ((G >= B)
+				? theta : 2 * M_PI - theta);
 			*(hsi_ptr->I_component + i * width + j) = (R + G + B) / 3.0;
 			//printf("Row:%d,Col:%d\tH=%f,S_component=%f,I_component=%f\n", i, j, *(hsi_ptr->H_component + i * width + j),
 			//	*(hsi_ptr->S_component + i * width + j), *(hsi_ptr->I_component + i * width + j));
@@ -807,7 +807,7 @@ HSIInfo* bgr2hsi(const BmpImage* data_ptr)
  * data_ptr(out): bgr data
  * hsi_ptr(in): hsi data
  */
-void hsi2bgr(BmpImage* data_ptr,const HSIInfo* hsi_ptr)
+void hsi2bgr(BmpImage* data_ptr, const HSIInfo* hsi_ptr)
 {
 	int32_t i, j;
 	double_t H_component, S_component, I_component, R, G, B;
@@ -833,7 +833,7 @@ void hsi2bgr(BmpImage* data_ptr,const HSIInfo* hsi_ptr)
 				R = I_component * (1 + (S_component * cos(H_component)) / cos(angle * 0.5 - H_component));
 				G = 3 * I_component - (R + B);
 			}
-			else if (H_component <= 2.0 * angle&& H_component > angle)
+			else if (H_component <= 2.0 * angle && H_component > angle)
 			{
 				H_component = H_component - angle;
 				R = I_component * (1 - S_component);
@@ -870,64 +870,70 @@ void free_HSI(HSIInfo* data_ptr)
 
 /* HW5 */
 
-BmpImage* fft(const BmpImage* data_ptr) 
-{
-	int32_t i, j, m, n;
-	BmpImage* freq_ptr = copyBmpImagePtr(data_ptr, 0);
-	int32_t width = data_ptr->info_header->bi_width;
-	int32_t height = data_ptr->info_header->bi_height;
-	// Normalization constant
-	int32_t idx = height * width;
-
-	double_t norm_constant = 1.0 / idx;
-	Complex* complex_data_ptr = (Complex*)malloc(sizeof(Complex));
-	complex_data_ptr->real = (double_t*)malloc(sizeof(double_t) * idx);
-	complex_data_ptr->imag = (double_t*)malloc(sizeof(double_t) * idx);
-	Complex* complex_data_ptr_out = (Complex*)malloc(sizeof(Complex));
-	complex_data_ptr_out->real = (double_t*)malloc(sizeof(double_t) * idx);
-	complex_data_ptr_out->imag = (double_t*)malloc(sizeof(double_t) * idx);
-	double_t* Re_p = (double_t*)malloc(sizeof(double_t) * height);
-	double_t* Im_p = (double_t*)malloc(sizeof(double_t) * height);
-	double_t* Re_f = (double_t*)malloc(sizeof(double_t) * height);
-	double_t* Im_f = (double_t*)malloc(sizeof(double_t) * height);
-	// Fast Fourier Transform 2D - Computation
-	printf("height:%d,width:%d\n", height, width);
-	for (i = height - 1; i >= 1; i--)
-		fft_real(
-			(data_ptr->DATA + i * width),
-			(complex_data_ptr->real + i * width),
-			(complex_data_ptr->imag + i * width),
-			 width, 1);
-
-	for ( j = width-1; j >=1; j--) 
-	{
-		for (i = height - 1; i >= 1; i--) 
-		{
-			*(Re_p+i) = *(complex_data_ptr->real + i * width + j);
-			*(Im_p+i) = *(complex_data_ptr->imag + i * width + j);
-		}
-
-		fft_complex(Re_p, Im_p, Re_f, Im_f, height, 1);
-
-		for (i = height - 1; i >= 1; i--) 
-		{
-			*(complex_data_ptr_out->real + i * width + j) = *(Re_p + i) * norm_constant;
-			*(complex_data_ptr_out->imag + i * width + j) = *(Im_p + i) * norm_constant;
-		}
-	}
-	for (i = height - 1; i >= 0; i--)
-		for (j = width - 1; j >= 0; j--)
-		{
-			//printf("row:%d,col:%d\n", i, j);
-			*(freq_ptr->DATA + i * width + j) = (uint8_t)sqrt(
-				pow(*(complex_data_ptr_out->real + i * width + j), 2) +
-				pow(*(complex_data_ptr_out->imag + i * width + j), 2));
-		}
-	free(Re_p); free(Im_p); free(Re_f); free(Im_f);
-	free_complex(complex_data_ptr);
-	free_complex(complex_data_ptr_out);
-	return freq_ptr;
-}
+//BmpImage* fft(const BmpImage* data_ptr) 
+//{
+//	int32_t i, j, m, n;
+//	BmpImage* freq_ptr = copyBmpImagePtr(data_ptr, 1);
+//	int32_t width = data_ptr->info_header->bi_width;
+//	int32_t height = data_ptr->info_header->bi_height;
+//	// Normalization constant
+//	int32_t idx = height * width;
+//
+//	double_t norm_constant = 1.0 / idx;
+//	/*Complex* complex_data_ptr = (Complex*)malloc(sizeof(Complex));
+//	complex_data_ptr->real = (double_t*)malloc(sizeof(double_t) * idx);
+//	complex_data_ptr->imag = (double_t*)malloc(sizeof(double_t) * idx);*/
+//
+//
+//	Complex* cur_height = (Complex*)malloc(sizeof(Complex));
+//	cur_height->real = (double_t*)malloc(sizeof(double_t) * height);
+//	cur_height->imag = (double_t*)malloc(sizeof(double_t) * height);
+//	Complex* cur_width = (Complex*)malloc(sizeof(Complex));
+//	cur_width->real = (double_t*)malloc(sizeof(double_t) * width);
+//	cur_width->imag = (double_t*)malloc(sizeof(double_t) * width);
+//	Complex* cur_height_ind = (Complex*)malloc(sizeof(Complex));
+//	Complex* cur_width_ind = (Complex*)malloc(sizeof(Complex));
+//	/*for (i = height - 1; i >= 0; i--)
+//		for (j = width - 1; j >= 0; j--)
+//		{
+//			*(complex_data_ptr->real + i * width + j) = 0;
+//			*(complex_data_ptr->imag + i * width + j) = 0;
+//		}*/
+//	for (j = width - 1; j >= 0; j--)
+//	{
+//		printf("col process:%d\n", j);
+//
+//		for (i = height - 1; i >= 0; i--)
+//		{
+//			*(cur_height->real + i) = pow(-1.0, (double_t)(i)+j) * (double_t) * (freq_ptr->DATA + j * height + i);
+//			*(cur_height->imag + i) = 0;
+//		}
+//		cur_height_ind = fft1d(cur_height, height);
+//		for (i = height - 1; i >= 0; i--)
+//		{
+//			*(freq_ptr->DATA + j * height + i) = *(cur_height_ind->real + i) / height;
+//		}
+//	}
+//	for (i = height - 1; j >= 0; j--)
+//	{
+//		for (j = width - 1; j >= 0; j--)
+//		{
+//			*(cur_width->real + j) = pow(-1.0, (double_t)(i)+j)* (double_t)* (freq_ptr->DATA + i * width + j);
+//			*(cur_width->imag + i) = 0;
+//		}
+//		cur_width_ind = fft1d(cur_width, width);
+//		for (j = width - 1; j >= 0; j--)
+//		{
+//			*(freq_ptr->DATA + i * width + j) = *(cur_width_ind->real + j) / width;
+//		}
+//		printf("row process:%d\n", i);
+//	}
+//
+//	free_complex(cur_height); free_complex(cur_width);
+//	free_complex(cur_height_ind); free_complex(cur_width_ind);
+//	//free_complex(complex_data_ptr);
+//	return freq_ptr;
+//}
 
 BmpImage* dct(const BmpImage* data_ptr)
 {
@@ -938,76 +944,306 @@ BmpImage* dwt(const BmpImage* data_ptr)
 {
 }
 
-void fft_real(double_t* Signal, double_t* Re_F, double_t* Im_F, int32_t N, int32_t t)
+
+/* slow transpose
+ * data_ptr(inout): matrix
+ * height(in): origin height
+ * width(in): dst height
+ * conjugate_trans(in): is conjugate
+ */
+void transpose_complex(Complex* data_ptr, const int32_t height, const int32_t width, const uint8_t conjugate_trans)
 {
-	int32_t half = N / 2;
-	int32_t i;
-	double_t r1, r2, i1, i2, tmp;
-	if (1 == N)
+	Complex* out_ptr = (Complex*)malloc(sizeof(Complex));
+	int32_t i, j;
+	int32_t dst_width = height;
+
+	out_ptr->real = (double_t*)malloc(sizeof(double_t) * height * width);
+	out_ptr->imag = (double_t*)malloc(sizeof(double_t) * height * width);
+	for (i = height - 1; i >= 0; i--)
 	{
-		*(Re_F) = *(Signal);
-		*(Im_F) = 0.0;
+		for (j = width - 1; j >= 0; j--)
+		{
+			*(out_ptr->real + j * dst_width + i) = *(data_ptr->real + i * width + j);
+			*(out_ptr->imag + j * dst_width + i) = *(data_ptr->imag + i * width + j);
+		}
+	}
+	if (conjugate_trans == 1)
+	{
+		for (i = height - 1; i >= 0; i--)
+			for (j = width - 1; j >= 0; j--)
+			{
+				//	out[j][i]=in[i][j]
+				*(data_ptr->real + i * width + j) = *(out_ptr->real + i * width + j);
+				*(data_ptr->imag + i * width + j) = -*(out_ptr->imag + i * width + j);
+			}
 	}
 	else
 	{
-		fft_real(Signal, Re_F, Im_F, half, 2 * t);
-		fft_real(Signal + t, Re_F + half, Im_F + half, half, 2 * t);
-		for (i = half - 1; i >= 1; i--)
-		{
-			tmp = -2.0 * M_PI * i / (double)(N);
-			r1 = cos(tmp);
-			i1 = sin(tmp);
-			r2 = *(Re_F + i + half) * r1 - *(Im_F + i + half) * i1;
-			i2 = *(Im_F + i + half) * r1 + *(Re_F + i + half) * i1;
-			/*
-			double r1 = Re_F[k];
-			double i1 = Im_F[k];
-			double r2 = Re_F[k + half];
-			double i2 = Im_F[k + half];
-			double alpha = - 2.0 * M_PI * (double)(k) / (double)(N);
-			double r3 = cos(alpha);
-			double i3 = sin(alpha);
-			double r4 = r2 * r3 - i2 * i3;
-			double i4 = r3 * i2 + r2 * i3;
-			Re_F[k + half] = r1 - r4;
-			Im_F[k + half] = i1 - i4;
-			Re_F[k] = r1 + r4;
-			Im_F[k] = i1 + i4;
-			*/
-			*(Re_F + i + half) = *(Re_F + i) - r2;
-			*(Im_F + i + half) = *(Im_F + i) - i2;
-			*(Re_F + i) +=  r2;
-			*(Im_F + i) +=  i2;
-		}
+		for (i = height - 1; i >= 0; i--)
+			for (j = width - 1; j >= 0; j--)
+			{
+				//	out[j][i]=in[i][j]
+				*(data_ptr->real + i * width + j) = *(out_ptr->real + i * width + j);
+				*(data_ptr->imag + i * width + j) = *(out_ptr->imag + i * width + j);
+			}
 	}
+	free_complex(out_ptr);
 }
 
-void fft_complex(double_t* Re_Signal, double_t* Im_Signal, double_t* Re_F, double_t* Im_F, int32_t N, int32_t t) {
-	int32_t half = N / 2;
-	int32_t i;
-	double_t r1, r2, i1, i2, tmp;
-	if (1 == N) {
-		*(Re_F) = *(Re_Signal);
-		*(Im_F) = *(Im_Signal); 
+/* using fft2d (padding in this way)
+ * data_ptr(in): data
+ * height,width(in): x, y dimension length
+ */
+Complex* fftshift(const Complex* data_ptr, const uint8_t dimension, int32_t* dimension_length)
+{
+	Complex* out_ptr = NULL;
+	Complex* tmp_ptr = NULL;
+	Complex* tmp_ptr_1 = NULL;
+	double_t real, imag;
+	int32_t begin_idx,middle_idx;
+	int32_t i, j;
+	if (0 == dimension)
+	{
+		printf("Dimension is lower than 0, please check it! Return NULL pointer!\n");
 	}
 	else
 	{
-		fft_complex(Re_Signal, Im_Signal, Re_F, Im_F, half, 2 * t);
-		fft_complex(Re_Signal + t, Im_Signal + t, Re_F + half, Im_F + half, half, 2 * t);
-		for (i = half-1; i>= 1; i--) 
+		/* *(dimension_length + 1) -> width *(dimension_length) -> height 
+		 */
+		out_ptr = (Complex*)malloc(sizeof(Complex));
+		if (1 == dimension)
 		{
-			tmp = -2.0 * M_PI * i / (double)(N);
-			r1 = cos(tmp);
-			i1 = sin(tmp);
-			r2 = *(Re_F + i + half) * r1 - *(Im_F + i + half) * i1;
-			i2 = *(Im_F + i + half) * r1 + *(Re_F + i + half) * i1;
-			*(Re_F + i + half) = *(Re_F + i) - r2;
-			*(Im_F + i + half) = *(Im_F + i) - i2;
-			*(Re_F + i) += r2;
-			*(Im_F + i) += i2;
+			out_ptr->real = (double_t*)malloc(sizeof(double_t) * *(dimension_length));
+			out_ptr->imag = (double_t*)malloc(sizeof(double_t) * *(dimension_length));
+			middle_idx = *(dimension_length) >>1;
+			if (*(dimension_length) % 2 == 0)
+			{	/* swap(i,i+dimension_length/2)
+				 *				0		<->	dimension_length/2
+				 * \vdots
+				 * dimension_length/2-1 <-> dimension_length - 1
+				 */	
+				for (i = middle_idx - 1; i >= 0; i--)
+				{
+					*(out_ptr->real + i + middle_idx) = *(data_ptr->real + i);
+					*(out_ptr->imag + i + middle_idx) = *(data_ptr->imag + i);
+					*(out_ptr->real + i) = *(data_ptr->real + i + middle_idx);
+					*(out_ptr->imag + i) = *(data_ptr->imag + i + middle_idx);
+				}
+			}
+			else
+			{
+				/* swap(i,i+dimension_length/2)
+				 *				0		-> dimension_length/2(5/2=2->3th place)
+				 * dimension_length/2 + 1 \cdots dimension_length - 1
+				 *						-> 0 \cdots dimension_length/2 -1
+				 * 1 \cdots dimension_length/2
+				 *						-> dimension_length/2 + 1 \cdots dimension_length - 1
+				 */
+				*(out_ptr->real + middle_idx) = *(data_ptr->real);
+				*(out_ptr->imag + middle_idx) = *(data_ptr->imag);
+				for (i = middle_idx ; i >= 1; i--)
+				{
+					
+					*(out_ptr->real + i + middle_idx) = *(data_ptr->real + i);
+					*(out_ptr->imag + i + middle_idx) = *(data_ptr->imag + i);
+					*(out_ptr->real + i - 1) = *(data_ptr->real + i + middle_idx);
+					*(out_ptr->imag + i - 1) = *(data_ptr->imag + i + middle_idx);
+				}
+			}
+		}
+		else if (2 == dimension)
+		{
+			real = *(dimension_length) * *(dimension_length + 1);
+			out_ptr->real = (double_t*)malloc(sizeof(double_t) * real);
+			out_ptr->imag = (double_t*)malloc(sizeof(double_t) * real);
+			tmp_ptr = (Complex*)malloc(sizeof(Complex));
+			tmp_ptr->real = (double_t*)malloc(sizeof(double_t) * *(dimension_length + 1));
+			tmp_ptr->imag = (double_t*)malloc(sizeof(double_t) * *(dimension_length + 1));
+			for (i = *(dimension_length)-1; i >= 0; i--)
+			{
+				for (j = *(dimension_length + 1) - 1; j >= 0; j--)
+				{
+					*(tmp_ptr->real + j) = *(data_ptr->real + i * *(dimension_length + 1) + j);
+					*(tmp_ptr->imag + j) = *(data_ptr->imag + i * *(dimension_length + 1) + j);
+				}
+				tmp_ptr_1 = fftshift(tmp_ptr, 1, (dimension_length + 1));
+				for (j = *(dimension_length + 1) - 1; j >= 0; j--)
+				{
+					*(out_ptr->real + i * *(dimension_length + 1) + j) = *(tmp_ptr_1->real + j);
+					*(out_ptr->imag + i * *(dimension_length + 1) + j) = *(tmp_ptr_1->imag + j);
+				}
+				free_complex(tmp_ptr_1);
+			}
+			free(tmp_ptr->real); free(tmp_ptr->imag);
+			tmp_ptr->real = (double_t*)malloc(sizeof(double_t) * *(dimension_length));
+			tmp_ptr->imag = (double_t*)malloc(sizeof(double_t) * *(dimension_length));
+			transpose_complex(out_ptr, *(dimension_length), *(dimension_length + 1), 0);
+			for (i = *(dimension_length + 1) - 1; i >= 0; i--)
+			{
+				for (j = *(dimension_length) - 1; j >= 0; j--)
+				{
+					*(tmp_ptr->real + j) = *(out_ptr->real + i * *(dimension_length) + j);
+					*(tmp_ptr->imag + j) = *(out_ptr->imag + i * *(dimension_length) + j);
+				}
+				tmp_ptr_1 = fftshift(tmp_ptr, 1, (dimension_length));
+				for (j = *(dimension_length) - 1; j >= 0; j--)
+				{
+					*(out_ptr->real + i * *(dimension_length) + j) = *(tmp_ptr_1->real + j);
+					*(out_ptr->imag + i * *(dimension_length) + j) = *(tmp_ptr_1->imag + j);
+				}
+				free_complex(tmp_ptr_1);
+			}
+			transpose_complex(out_ptr, *(dimension_length + 1), *(dimension_length), 0);
+			free_complex(tmp_ptr);
+		}
+		else
+		{
+			printf("Dimension(%d) is bigger than 2 is not support now! Return NULL pointer!\n", dimension);
 		}
 	}
+	return out_ptr;
+}
+
+/* using fft2d (padding in this function) only support 2^n length so padding it
+ * data_ptr(in): data
+ * height,width(in): x, y dimension length
+ */
+Complex* fft2d(const Complex* data_ptr, const int32_t height, const int32_t width)
+{
+	Complex* out_ptr = NULL;
+	Complex* height_ptr = NULL;
+	Complex* width_ptr = NULL;
 	
+	int32_t i, j;
+	if (height <= 0 && width <= 0)
+	{
+		printf("Dimension is lower than 2, please check it! Return NULL pointer!\n");
+	}
+	else
+	{
+		out_ptr = (Complex*)malloc(sizeof(Complex));
+		height_ptr = (Complex*)malloc(sizeof(Complex));
+		width_ptr = (Complex*)malloc(sizeof(Complex));
+		/*idx_pow = 0;
+		for (; length_d > 1; )
+		{
+			length_d *= 0.5;
+			idx_pow++;
+		}
+		ptr_power_idx = pow(2, idx_pow);
+		printf("padding from %d->%d\n", ptr_length, ptr_power_idx);*/
+	}
+	return out_ptr;
+}
+
+
+/* fft1d 
+ * data_ptr(in): data
+ * ptr_length(in): data_init_length init_length -> true length (padding zeros)
+ * wds_ptr(in): W_N^k
+ */
+Complex* fft1d(const Complex* data_ptr, const int32_t ptr_length,const Complex* wds_ptr)
+{
+	int32_t ptr_power_idx, ptr_power_half;
+	double_t length_d = ptr_length;
+	Complex* out_ptr = NULL;
+	int32_t i, j, k, l, idx0, idx1, idx_pow;
+	double_t treal, timag,ureal,uimag;
+	if (ptr_length <= 0)
+	{
+		printf("data length(%d) is smaller than 1, please check it! Return NULL pointer!\n", ptr_length);
+	}
+	else
+	{
+		idx_pow = 0;
+		for (; length_d > 1; )
+		{
+			length_d *= 0.5;
+			idx_pow++;
+		}
+		ptr_power_idx = pow(2, idx_pow);
+		printf("padding from %d->%d\n", ptr_length, ptr_power_idx);
+		out_ptr = (Complex*)malloc(sizeof(Complex));
+		out_ptr->real = (double_t*)malloc(sizeof(double_t) * ptr_power_idx);
+		out_ptr->imag = (double_t*)malloc(sizeof(double_t) * ptr_power_idx);
+		/* padding from 2^n fft */
+		for (i = ptr_power_idx - 1; i >= 0; i--)
+		{
+			if ((ptr_length - 1) >= i)
+			{
+				*(out_ptr->real + i) = *(data_ptr->real + i);
+				*(out_ptr->imag + i) = *(data_ptr->imag + i);
+			}
+			else
+			{
+				*(out_ptr->real + i) = 0;
+				*(out_ptr->imag + i) = 0;
+			}
+		}
+		// 位反转置换 Bit-reversal Permutation 这个是正确的
+		for (i = 0; i < ptr_power_idx; i++)
+		{
+			k = i; l = 0;
+			for (j = 0; j < idx_pow; j++)
+			{
+				l = (l << 1) + (k & 1);    // l = l * 2 + k % 2;  
+				k >>= 1;        // k = k / 2;  
+			}
+			if (l > i)
+			{
+				treal = *(out_ptr->real + i);
+				timag = *(out_ptr->imag + i);
+				*(out_ptr->real + i) = *(out_ptr->real + l);
+				*(out_ptr->imag + i) = *(out_ptr->imag + l);
+				*(out_ptr->real + l) = treal;
+				*(out_ptr->imag + l) = timag;
+			}
+		}
+		for (i = 2; i <= ptr_power_idx; i = (i << 1))
+		{
+			for (k = 0; k < ptr_power_idx; k += i)
+			{
+				for (j = 0; j < (i >> 1); j++)
+				{
+					idx0 = k + j;
+					idx1 = idx0 + (i >> 1);
+					l = ptr_power_idx * j / i;
+					treal = *(wds_ptr->real + l) * *(out_ptr->real + idx1) - *(wds_ptr->imag + l) * *(out_ptr->imag + idx1);
+					timag = *(wds_ptr->real + l) * *(out_ptr->imag + idx1) + *(wds_ptr->imag + l) * *(out_ptr->real + idx1);
+					ureal = *(out_ptr->real + idx0);
+					uimag = *(out_ptr->imag + idx0);
+					*(out_ptr->real + idx0) = ureal + treal;
+					*(out_ptr->imag + idx0) = uimag + timag;
+					*(out_ptr->real + idx1) = ureal - treal;
+					*(out_ptr->imag + idx1) = uimag - timag;
+				}
+			}
+		}
+	}
+	return out_ptr;
+}
+	
+/* fft_windows calculate the W_N^(n)
+ * ptr_power_idx(in): length(log2(length)=Z) 
+ */
+Complex* fft_windows(const int32_t ptr_power_idx)
+{
+	double_t treal, timag;
+	int32_t i, ptr_power_half = ptr_power_idx >> 1;
+	Complex* wds_ptr = (Complex*)malloc(sizeof(Complex));
+	wds_ptr->real = (double_t*)malloc(sizeof(double_t) * ptr_power_half);
+	wds_ptr->imag = (double_t*)malloc(sizeof(double_t) * ptr_power_half);
+	*wds_ptr->real = 1;
+	*wds_ptr->imag = 0;
+	treal = 2 * M_PI / ptr_power_idx;
+	timag = -sin(treal);
+	treal = cos(treal);
+	for (i = 1; i < ptr_power_half; i++)
+	{
+		*(wds_ptr->real + i) = *(wds_ptr->real + i - 1) * treal - *(wds_ptr->imag + i - 1) * timag;
+		*(wds_ptr->imag + i) = *(wds_ptr->real + i - 1) * timag + *(wds_ptr->imag + i - 1) * treal;
+	}
+	return wds_ptr;
 }
 
 /* free the complex pointer

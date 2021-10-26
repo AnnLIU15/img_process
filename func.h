@@ -49,9 +49,15 @@ BmpImage* dct(const BmpImage* data_ptr);
 
 BmpImage* dwt(const BmpImage* data_ptr);
 
-void fft_real(double_t* Signal, double_t* Re_F, double_t* Im_F, int32_t N, int32_t t);
+void transpose_complex(Complex* data_ptr, const int32_t height, const int32_t width, const uint8_t conjugate_trans);
 
-void fft_complex(double_t* Re_Signal, double_t* Im_Signal, double_t* Re_F, double_t* Im_F, int32_t N, int32_t t);
+Complex* fftshift(const Complex* data_ptr, const uint8_t dimension, int32_t* dimension_length);
+
+Complex* fft2d(const Complex* data_ptr, const int32_t height, const int32_t width);
+
+Complex* fft1d(const Complex* data_ptr, const int32_t ptr_length, const Complex* wds_ptr);
+
+Complex* fft_windows(const int32_t ptr_power_idx);
 
 void free_complex(Complex* x);
 
