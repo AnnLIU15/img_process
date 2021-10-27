@@ -45,10 +45,6 @@ void free_HSI(HSIInfo* data_ptr);
 
 BmpImage* fft(const BmpImage* data_ptr);
 
-BmpImage* dct(const BmpImage* data_ptr);
-
-BmpImage* dwt(const BmpImage* data_ptr);
-
 void transpose_complex(Complex* data_ptr, const int32_t height, const int32_t width, const uint8_t conjugate_trans);
 
 Complex* fftshift(const Complex* data_ptr, const uint8_t dimension, int32_t* dimension_length);
@@ -58,6 +54,17 @@ Complex* fft2d(const Complex* data_ptr, const int32_t height, const int32_t widt
 Complex* fft1d(const Complex* data_ptr, const int32_t ptr_length, const Complex* wds_ptr);
 
 Complex* fft_windows(const int32_t ptr_power_idx);
+
+BmpImage* dct(const BmpImage* data_ptr);
+
+Complex* dct2d(const Complex* data_ptr, const int32_t height, const int32_t width, const uint8_t is_real);
+
+Complex* dct1d(const Complex* data_ptr, const int32_t ptr_length, const uint8_t is_real,
+	const Complex* wds_ptr, const Complex* fft_wds_ptr);
+
+Complex* dct_windows(const int32_t ptr_power_idx, const uint8_t is_real);
+
+BmpImage* dwt(const BmpImage* data_ptr);
 
 void free_complex(Complex* x);
 

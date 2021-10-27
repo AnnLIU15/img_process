@@ -5,7 +5,10 @@
 %%%%%%%%%%%%%%%%%%%%%%
 clear all;
 clc;
-f = imread("C:/Users/zqliu/Desktop/lena512.bmp");
+% f = imread("C:/Users/zqliu/Desktop/lena512.bmp");
+f = zeros(1024,512);
+f(1:600,1:400) = double( imread("C:/Users/zqliu/Desktop/data2.bmp"));
+figure(1)
 center_loc = size(f);
 %figure(1);imshow(f);
 f2=fft2(f);
@@ -40,8 +43,8 @@ title("matlab 1d fft->2dfft");
 % center_loc(1)/2+1~center_loc(1)-1 -> 0~center_loc(1)/2-1
 tmp1(1:(center_loc(1))/2,:)=tmp(center_loc(1)/2+1:center_loc(1),:);
 tmp1(center_loc(1)/2+1:center_loc(1),:)=tmp(1:(center_loc(1))/2,:);
-tmp2(:,1:(center_loc(1))/2)=tmp1(:,center_loc(1)/2+1:center_loc(1));
-tmp2(:,center_loc(1)/2+1:center_loc(1))=tmp1(:,1:(center_loc(1))/2);
+tmp2(:,1:(center_loc(2))/2)=tmp1(:,center_loc(2)/2+1:center_loc(2));
+tmp2(:,center_loc(2)/2+1:center_loc(2))=tmp1(:,1:(center_loc(2))/2);
 
 
 disp(['fftshift vs my_shift: ',num2str(sum(sum(abs((tmp2-fftshift(f2)))>1e-5)))]);
@@ -49,7 +52,12 @@ disp(['fftshift vs my_shift: ',num2str(sum(sum(abs((tmp2-fftshift(f2)))>1e-5)))]
 
 subplot(3,1,3);
 f5 = log(abs(tmp2));
-imshow(f5,[]);
+fmin = min(min(f5));
+fmax = max(max(f5));
+f5 = 255.0*(f5-fmin)/(fmax-fmin);
+f5 = uint8(f5);
+imshow(f5);
 title("my\_2dfft and my\_fftshift");
-
-
+figure(2)
+imshow(f5);
+title("my\_2dfft and my\_fftshift");

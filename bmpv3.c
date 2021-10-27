@@ -93,14 +93,81 @@ int main()
 
     /* HW5 */
     {
+    /*const char* hw5_in = "./data/data2.bmp";
+     const char* hw5_out_fft = "./output/data2_fft.bmp";
+     const char* hw5_out_dct = "./output/data2_dct.bmp";
+     const char* hw5_out_dwt = "./output/data2_dwt.bmp";
+     */
+
     const char* hw5_in = "./data/lena512.bmp";
-    const char* hw5_out = "./output/lena512_fft.bmp";
+    const char* hw5_out_fft = "./output/lena512_fft.bmp";
+    const char* hw5_out_dct = "./output/lena512_dct.bmp";
+    const char* hw5_out_dwt = "./output/lena512_dwt.bmp";
     BmpImage* reader = read(hw5_in);
     BmpImage* fft_pointer = fft(reader);
-    save(hw5_out, fft_pointer);
+    BmpImage* dct_pointer = dct(reader);
+    save(hw5_out_fft, fft_pointer);
+    save(hw5_out_dct, dct_pointer);
     free_ptr(fft_pointer);
+    free_ptr(dct_pointer);
     free_ptr(reader);
     }
-    
+   // int32_t width = 4;
+   // int32_t height = 6;
+   // int32_t length = height* width;
+   // int32_t is_real = 1;
+   // int32_t idx_pow, ptr_power_idx;
+   // int32_t fft_length;
+   // double_t length_d = length;
+   // idx_pow = 0;
+   // for (; length_d > 1; )
+   // {
+   //     length_d *= 0.5;
+   //     idx_pow++;
+   // }
+   // ptr_power_idx = pow(2, idx_pow);
+   // Complex* data_ptr = (Complex*)malloc(sizeof(Complex));
+   // data_ptr->real = (double_t*)malloc(sizeof(double_t) * ptr_power_idx);
+   // data_ptr->imag = (double_t*)malloc(sizeof(double_t) * ptr_power_idx);
+   // printf("Origin Data:\n");
+   // for (int i = 0; i < ptr_power_idx; i++)
+   // {
+   //     if (i % width == 0 && i != 0)
+   //         printf("\n");
+   //     *(data_ptr->real + i) = i >= length?0:i;
+   //     *(data_ptr->imag + i) = (is_real == 1|| i >= length) ? 0 : -i;
+   //     printf("%f,%f\t", *(data_ptr->real + i), *(data_ptr->imag + i));
+   //     
+   // }
+   // printf("\n\n");
+   // Complex* dct_ptr = dct2d(data_ptr, 8, 4, is_real);
+   // Complex* fft_ptr = fft2d(data_ptr, 8, 4);
+   ///* printf("DCT kernel:\n");
+   // for (size_t i = 0; i < ptr_power_idx; i++)
+   // {
+   //     
+   //     printf("%f,%f\n", *(dct_wds_ptr->real + i), *(dct_wds_ptr->imag + i));
+   // }
+   // printf("FFT kernel:\n");
+   // for (size_t i = 0; i < fft_length>>1; i++)
+   // {
+   //     printf("%f,%f\n", *(fft_wds_ptr->real + i), *(fft_wds_ptr->imag + i));
+   // }*/
+   // printf("\n\nOut:\n");
+   // for (int i = 0; i < ptr_power_idx; i++)
+   // {
+   //     if (i % width == 0 && i != 0)
+   //         printf(";\n");
+   //     printf("%f+1j*(%f),", *(dct_ptr->real + i), *(dct_ptr->imag + i));
+   //     
+   // }
+   // printf("\n\nFFT Out:\n");
+   // for (int i = 0; i < ptr_power_idx; i++)
+   // {
+   //     if (i % width == 0 && i != 0)
+   //         printf(";\n");
+   //     printf("%f+1j*(%f),", *(fft_ptr->real + i), *(fft_ptr->imag + i));
+
+   // }
 }
 
