@@ -790,11 +790,9 @@ HSIInfo* bgr2hsi(const BmpImage* data_ptr)
 			theta = ((R - G) + (R - B)) * 0.5;
 			theta = theta / (sqrt(pow((R - G), 2) + (R - B) * (G - B)) + 1e-15);
 			theta = acos(theta);
-
-			*(hsi_ptr->S_component + i * width + j) = 1 - 3.0 * (R <= B ? ((R <= G) ? R : G) : ((B <= G) ? B : G))
-				/ (R + G + B + 1e-15);
-			*(hsi_ptr->H_component + i * width + j) = abs(*(hsi_ptr->S_component + i * width + j)) < 1e-10 ? 0 : ((G >= B)
-				? theta : 2 * M_PI - theta);
+			*(hsi_ptr->S_component + i * width + j) = 1 - 3.0 * min(min(R, B), G)/ (R + G + B + 1e-15);
+			*(hsi_ptr->H_component + i * width + j) = abs(*(hsi_ptr->S_component + i * width + j)) < 1e-15 ? 0 : ((B > G)
+				? 2 * M_PI - theta : theta);
 			*(hsi_ptr->I_component + i * width + j) = (R + G + B) / 3.0;
 			//printf("Row:%d,Col:%d\tH=%f,S_component=%f,I_component=%f\n", i, j, *(hsi_ptr->H_component + i * width + j),
 			//	*(hsi_ptr->S_component + i * width + j), *(hsi_ptr->I_component + i * width + j));

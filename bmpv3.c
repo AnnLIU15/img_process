@@ -94,13 +94,13 @@ int main()
     /* HW5 */
     {
     const char* hw5_in = "./data/lena512.bmp";
-    const char* hw5_out = "./output/lena512_freq.bmp";
+    const char* hw5_out = "./output/lena512_fft.bmp";
     BmpImage* reader = read(hw5_in);
     BmpImage* fft_pointer = fft(reader);
     save(hw5_out, fft_pointer);
     free_ptr(fft_pointer);
     free_ptr(reader);
     }
-
+    
 }
 
