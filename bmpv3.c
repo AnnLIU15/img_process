@@ -92,12 +92,12 @@ int main()
     }*/
 
     /* HW5 */
-    {
-    /*const char* hw5_in = "./data/data2.bmp";
-     const char* hw5_out_fft = "./output/data2_fft.bmp";
-     const char* hw5_out_dct = "./output/data2_dct.bmp";
-     const char* hw5_out_dwt = "./output/data2_dwt.bmp";
-     */
+    /*{
+     // const char* hw5_in = "./data/data2.bmp";
+     // const char* hw5_out_fft = "./output/data2_fft.bmp";
+     // const char* hw5_out_dct = "./output/data2_dct.bmp";
+     // const char* hw5_out_dwt = "./output/data2_dwt.bmp";
+     
 
     const char* hw5_in = "./data/lena512.bmp";
     const char* hw5_out_fft = "./output/lena512_fft.bmp";
@@ -111,7 +111,7 @@ int main()
     free_ptr(fft_pointer);
     free_ptr(dct_pointer);
     free_ptr(reader);
-    }
+    }*/
    // int32_t width = 4;
    // int32_t height = 6;
    // int32_t length = height* width;
@@ -169,5 +169,56 @@ int main()
    //     printf("%f+1j*(%f),", *(fft_ptr->real + i), *(fft_ptr->imag + i));
 
    // }
+   int32_t width = 4;
+   int32_t height = 6;
+   int32_t length = height* width;
+   int32_t is_real = 0;
+   Complex* data_ptr = (Complex*)malloc(sizeof(Complex));
+   data_ptr->real = (double_t*)malloc(sizeof(double_t) * length);
+   data_ptr->imag = (double_t*)malloc(sizeof(double_t) * length);
+   printf("Origin Data:\n");
+   for (int i = 0; i < length; i++)
+   {
+       if (i % width == 0 && i != 0)
+           printf("\n");
+       *(data_ptr->real + i) = i >= length ? 0 : i;
+       *(data_ptr->imag + i) = is_real == 1  ? 0 : -i;
+       printf("%f,%f\t", *(data_ptr->real + i), *(data_ptr->imag + i));
+   }
+   uint8_t dimension = 2;
+   dimension = dimension == 1 ? dimension<<1 : dimension;
+   uint8_t* kernel_size = (uint8_t*)malloc(sizeof(uint8_t)* dimension);
+   int32_t* length_ptr = (int32_t*)malloc(sizeof(int32_t) * dimension);
+   uint8_t* padding = (uint8_t*)malloc(sizeof(uint8_t) * dimension);
+   /* row padding */
+   *(length_ptr) = height; *(length_ptr+1) = width;
+   //// 1 row 2 col
+   //*(kernel_size) = 1; 
+   //*(kernel_size+1) = 2;
+   // *(padding) = 0; 
+   // *(padding+1) = 1;
+
+   // 2 row 1 col
+   *(kernel_size) = 2;
+   *(kernel_size + 1) = 1;
+   *(padding) = 1; *(padding + 1) = 0;
+   Complex* kernel_ptr = (Complex*)malloc(sizeof(Complex));
+   kernel_ptr->real = (double_t*)malloc(sizeof(double_t) * *(kernel_size) * *(kernel_size + 1));
+   kernel_ptr->imag = (double_t*)malloc(sizeof(double_t) * *(kernel_size) * *(kernel_size + 1));
+   *(kernel_ptr->real) = 0.707106781186548; *(kernel_ptr->imag) = -0.707106781186548;
+   *(kernel_ptr->real+1) = 0.707106781186548; *(kernel_ptr->imag+1) = 0.707106781186548;
+
+   Complex* out_ptr = Conv(data_ptr, kernel_ptr, kernel_size, length_ptr, dimension, padding,1);
+   printf("\n\n\Out Data:\n");
+   int32_t dst_height = height + (*(padding) << 1) - *(kernel_size)+1;
+   int32_t dst_width = width + (*(padding + 1) << 1) - *(kernel_size + 1) + 1;
+   for (int i = 0; i < dst_height; i++)
+   {
+       for (int j = 0; j < dst_width; j++)
+       {
+           printf("%f,%f\t", *(out_ptr->real + i* dst_width +j), *(out_ptr->imag + i * dst_width + j));
+       }
+       printf("\n");
+   }
 }
 

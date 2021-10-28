@@ -1009,7 +1009,7 @@ void transpose_complex(Complex* data_ptr, const int32_t height, const int32_t wi
  * data_ptr(in): data
  * height,width(in): x, y dimension length
  */
-Complex* fftshift(const Complex* data_ptr, const uint8_t dimension, int32_t* dimension_length)
+Complex* fftshift(const Complex* data_ptr, const uint8_t dimension, const int32_t* dimension_length)
 {
 	Complex* out_ptr = NULL;
 	Complex* tmp_ptr = NULL;
@@ -1725,6 +1725,173 @@ Complex* dct_windows(const int32_t ptr_power_idx, const uint8_t is_real)
 BmpImage* dwt(const BmpImage* data_ptr)
 {
 }
+
+/* convolution when height or width==1 is 1D conv   stride = 1
+ * data_ptr(in): data
+ * conv_kernel(in): conv kernel
+ * kernel_size(in): kernel_size
+ * length(in): data length
+ * dimension: 1d 2d 3d
+ * padding_mode: 0 -> padding zero 1 -> padding the nearest
+ */
+Complex* Conv(const Complex* data_ptr, const Complex* conv_kernel, const uint8_t* kernel_size, const int32_t* length, const uint8_t dimension, const uint8_t* padding,const uint8_t padding_mode)
+{
+	Complex* padding_ptr = NULL;
+	Complex* out_ptr = NULL;
+	int32_t i, j, k, l;
+	double_t real, imag, tmp_real, tmp_imag;
+	int32_t dst_height, dst_width, padding_height, padding_width;
+	int32_t* idx_ptr = NULL;		// for geq 3D in the future
+	int32_t* padding_length_ptr = NULL; // for geq 3D in the future
+	int32_t* dst_length_ptr = NULL; // for geq 3D in the future
+	double_t* real_ptr = NULL;		// for geq 3D in the future
+	double_t* image_ptr = NULL;		// for geq 3D in the future
+	int64_t pixel_num;
+	uint8_t is_satisfied = 1;
+	if (dimension == 0)
+	{
+		is_satisfied = 0;
+	}
+	else
+	{
+		for (i = dimension - 1; i >= 0; i--)
+		{
+			if (*(length + 1) < 1 || *(kernel_size + i) < 1)
+			{
+				is_satisfied = 0;
+			}
+			else
+			{
+				;
+			}
+		}
+	}
+	if (0 == is_satisfied)
+	{
+		printf("\nSome information is wrong! It will be show below. All of them should greater or equal to 1.\n");
+		printf("Total Dimension = %d\n", dimension);
+		for (i = dimension - 1; i >= 0; i--)
+		{
+			printf("Dimension %d: data_length(%d) kernel_size(%d)\n",i+1, *(length + i), *(kernel_size + i));
+		}
+		printf("Return NULL pointer.\n");
+	}
+	else
+	{
+		if (dimension <= 2)
+		{
+			pixel_num = (int64_t) * (padding) << 1;
+			dst_height = pixel_num + *(length);
+			pixel_num = (int64_t) * (padding + 1) << 1;
+			dst_width = pixel_num + *(length+1);
+			pixel_num = (int64_t)dst_height * dst_width;
+			// printf("\nPadding from (%d,%d)->(%d,%d)\n", *(length), *(length + 1), dst_height, dst_width);
+			padding_ptr = (Complex*)malloc(sizeof(Complex));
+			padding_ptr->real = (double_t*)malloc(sizeof(double_t) * pixel_num);
+			padding_ptr->imag = (double_t*)malloc(sizeof(double_t) * pixel_num);
+			/* padding */
+			for (i = dst_height - 1; i >= 0; i--)
+			{
+				for (j = dst_width - 1; j >= 0; j--)
+				{
+					is_satisfied = i >= dst_height - *(padding) || i < *(padding) ||
+						j >= dst_width - *(padding + 1) || j < *(padding + 1) ? 0 : 1;
+					*(padding_ptr->real + i * dst_width + j) = is_satisfied == 1 ?
+						*(data_ptr->real + (i - *(padding)) * *(length + 1) + j - *(padding + 1)) : 0;
+					*(padding_ptr->imag + i * dst_width + j) = is_satisfied == 1 ?
+						*(data_ptr->imag + (i - *(padding)) * *(length + 1) + j - *(padding + 1)) : 0;
+				}
+			}
+			if (padding_mode == 1)
+			{
+				/* for each row */
+				for (i = *padding - 1; i >= 0; i--)
+				{
+					for (j = dst_width - 1; j >= 0; j--)
+					{
+						*(padding_ptr->real + i * dst_width + j) = *(padding_ptr->real + (i + 1) * dst_width + j);
+						*(padding_ptr->imag + i * dst_width + j) = *(padding_ptr->imag + (i + 1) * dst_width + j);
+						*(padding_ptr->real + (dst_height - 1 - i) * dst_width + j) = *(padding_ptr->real + (dst_height - 2 - i) * dst_width + j);
+						*(padding_ptr->imag + (dst_height - 1 - i) * dst_width + j) = *(padding_ptr->imag + (dst_height - 2 - i) * dst_width + j);
+					}
+				}
+				/*printf("\n\n\n");
+				for (i =  0; i < dst_height; i++)
+				{
+					for (j = 0 ; j < dst_width; j++)
+						printf("%f,%f\t", *(padding_ptr->real + i * dst_width + j), *(padding_ptr->imag + i * dst_width + j));
+					printf("\n");
+				}
+				printf("\n\n\n");*/
+				/* for each col */
+				for (j = *(padding+1) - 1; j >= 0; j--)
+				{
+					for (i = dst_height - 1; i >= 0; i--)
+					{
+						*(padding_ptr->real + i * dst_width + j) = *(padding_ptr->real + i * dst_width + j+1);
+						*(padding_ptr->imag + i * dst_width + j) = *(padding_ptr->imag + i * dst_width + j+1);
+						*(padding_ptr->real + i * dst_width + dst_width - 1 - j) = *(padding_ptr->real + i * dst_width + dst_width - 2 - j);
+						*(padding_ptr->imag + i * dst_width + dst_width - 1 - j) = *(padding_ptr->imag + i * dst_width + dst_width - 2 - j);
+					}
+				}
+			}
+			else
+			{
+				;
+			}
+			printf("\n\n\nPadding Data:\n");
+			for (i = 0; i < dst_height; i++)
+			{
+				for (j = 0; j < dst_width; j++)
+					printf("%f,%f\t", *(padding_ptr->real + i * dst_width + j), *(padding_ptr->imag + i * dst_width + j));
+				printf("\n");
+			}
+			printf("\n\n\n");
+			padding_height = dst_height;
+			padding_width = dst_width;
+			pixel_num = (int64_t)(*(padding) << 1) - *(kernel_size)+1;
+			dst_height = pixel_num + *(length);
+			pixel_num = (int64_t)(*(padding + 1) << 1) - *(kernel_size + 1) + 1;
+			dst_width = pixel_num + *(length + 1);
+			pixel_num = (int64_t)dst_height * dst_width;
+			out_ptr = (Complex*)malloc(sizeof(Complex));
+			out_ptr->real = (double_t*)malloc(sizeof(double_t) * pixel_num);
+			out_ptr->imag = (double_t*)malloc(sizeof(double_t) * pixel_num);
+			printf("Out (%d,%d)->(%d,%d)\n", *(length), *(length + 1), dst_height, dst_width);
+			for (i = dst_height - 1; i >= 0; i--)
+			{
+				for (j = dst_width - 1; j >= 0; j--)
+				{
+					real = imag = 0;
+					for (k = *(kernel_size)-1; k >= 0; k--)
+					{
+						for (l = *(kernel_size + 1) - 1; l >= 0; l--)
+						{
+							tmp_real = *(conv_kernel->real + k * *(kernel_size + 1) + l);
+							tmp_imag = *(conv_kernel->imag + k * *(kernel_size + 1) + l);
+							real += *(padding_ptr->real + (i + k) * padding_width + j + l) * tmp_real -
+								*(padding_ptr->imag + (i + k) * padding_width + j + l) * tmp_imag;
+							imag += *(padding_ptr->real + (i + k) * padding_width + j + l) * tmp_imag +
+								*(padding_ptr->imag + (i + k) * padding_width + j + l) * tmp_real;
+							//printf("kernel %d, %f,%f\n", k** (kernel_size + 1) + l, tmp_real, tmp_imag);
+						}
+						
+					}
+					*(out_ptr->real + i * dst_width + j) = real;
+					*(out_ptr->imag + i * dst_width + j) = imag;
+				}
+			}
+
+		}
+		else
+		{
+			;
+		}
+	}
+	free_complex(padding_ptr);
+	return out_ptr;
+}
+
 
 /* free the complex pointer
  * x(inout): ptr

@@ -47,7 +47,7 @@ BmpImage* fft(const BmpImage* data_ptr);
 
 void transpose_complex(Complex* data_ptr, const int32_t height, const int32_t width, const uint8_t conjugate_trans);
 
-Complex* fftshift(const Complex* data_ptr, const uint8_t dimension, int32_t* dimension_length);
+Complex* fftshift(const Complex* data_ptr, const uint8_t dimension,const int32_t* dimension_length);
 
 Complex* fft2d(const Complex* data_ptr, const int32_t height, const int32_t width);
 
@@ -65,6 +65,9 @@ Complex* dct1d(const Complex* data_ptr, const int32_t ptr_length, const uint8_t 
 Complex* dct_windows(const int32_t ptr_power_idx, const uint8_t is_real);
 
 BmpImage* dwt(const BmpImage* data_ptr);
+
+Complex* Conv(const Complex* data_ptr, const Complex* conv_kernel, const uint8_t* kernel_size, const int32_t* length, const uint8_t dimension, const uint8_t* padding, const uint8_t padding_mode);
+
 
 void free_complex(Complex* x);
 
