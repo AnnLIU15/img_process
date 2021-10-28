@@ -5,9 +5,9 @@
 %%%%%%%%%%%%%%%%%%%%%%
 clear all;
 clc;
-% f = imread("C:/Users/zqliu/Desktop/lena512.bmp");
+% f = imread("C:/Users/zqliu/source/repos/bmpv3/data/lena512.bmp");
 f = zeros(1024,512);
-f(1:600,1:400) = double( imread("C:/Users/zqliu/Desktop/data2.bmp"));
+f(1:600,1:400) = double( imread("C:/Users/zqliu/source/repos/bmpv3/data/data2.bmp"));
 figure(1)
 center_loc = size(f);
 %figure(1);imshow(f);

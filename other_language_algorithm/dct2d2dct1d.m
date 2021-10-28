@@ -5,10 +5,10 @@
 %%%%%%%%%%%%%%%%%%%%%%
 clear
 clc;
-% a = imread("C:/Users/zqliu/Desktop/lena512.bmp");
+% a = imread("C:/Users/zqliu/source/repos/bmpv3/data/lena512.bmp");
 % a = double(a);
 a =zeros(1024,512);
-a(1:600,1:400) = double(imread("C:/Users/zqliu/Desktop/data2.bmp"));
+a(1:600,1:400) = double(imread("C:/Users/zqliu/source/repos/bmpv3/data/data2.bmp"));
 % a=dct2(a);
 % a =fftshift(a);
 % a_tmp = log(abs(a));
