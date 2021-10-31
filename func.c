@@ -174,7 +174,6 @@ void copyBmpImageInfo(const BmpImage* data_ptr, BmpImage* new_ptr)
 	new_ptr->info_header->bi_width = data_ptr->info_header->bi_width;
 	new_ptr->info_header->bi_x_pels_per_meter = data_ptr->info_header->bi_x_pels_per_meter;
 	new_ptr->info_header->bi_y_pels_per_meter = data_ptr->info_header->bi_y_pels_per_meter;
-
 }
 
 /* write the file
@@ -1724,6 +1723,35 @@ Complex* dct_windows(const int32_t ptr_power_idx, const uint8_t is_real)
 
 BmpImage* dwt(const BmpImage* data_ptr)
 {
+}
+
+Complex* dwt_CA(const Complex* data_ptr, const int32_t in_height, const int32_t in_width)
+{
+	Complex* out_ptr = NULL;
+
+}
+
+Complex* dwt_CH(const Complex* data_ptr, const int32_t in_height, const int32_t in_width)
+{
+	Complex* out_ptr = NULL;
+
+}
+
+Complex* dwt_CV(const Complex* data_ptr, const int32_t in_height, const int32_t in_width)
+{
+	Complex* out_ptr = NULL;
+
+}
+
+Complex* dwt_CD(const Complex* data_ptr, const int32_t in_height, const int32_t in_width)
+{
+	Complex* out_ptr = NULL;
+
+}
+
+Complex* convdown(const Complex* data_ptr, const Complex* conv_kernel, const uint8_t* kernel_size, const uint8_t dimension, const int32_t* first, const int32_t* last)
+{
+
 }
 
 /* convolution when height or width==1 is 1D conv   stride = 1

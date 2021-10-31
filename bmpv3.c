@@ -92,7 +92,7 @@ int main()
     }*/
 
     /* HW5 */
-    /*{
+    {
      // const char* hw5_in = "./data/data2.bmp";
      // const char* hw5_out_fft = "./output/data2_fft.bmp";
      // const char* hw5_out_dct = "./output/data2_dct.bmp";
@@ -111,7 +111,7 @@ int main()
     free_ptr(fft_pointer);
     free_ptr(dct_pointer);
     free_ptr(reader);
-    }*/
+    }
    // int32_t width = 4;
    // int32_t height = 6;
    // int32_t length = height* width;
