@@ -8,7 +8,7 @@ clc;
 % f = imread("C:/Users/zqliu/source/repos/bmpv3/data/data2.bmp");
 f = imread("C:/Users/zqliu/source/repos/bmpv3/data/lena512.bmp");
 f_copy = f;
-[ca,ch,cv,cd] = my_dwt2(f,'db1');
+[ca,ch,cv,cd] = my_dwt2(f);
 % [ca1,ch1,cv1,cd1] = dwt2(f,'db1','mode','sym');
 % sum((ca-ca1)./ca1>1e-5,'all')
 % sum((ch-ch1)./ch1>1e-5,'all')
@@ -36,7 +36,7 @@ f_copy = f;
 % f = f_copy;
 % 
 % for i = 1:10000
-%     [ca,ch,cv,cd] = my_dwt2(f,'haar');
+%     [ca,ch,cv,cd] = my_dwt2(f);
 %     max_ca = max(ca,[],'all'); min_ca = min(ca,[],'all');
 %     f = uint8(round((ca - min_ca)/(max_ca-min_ca)*255));
 %     idx = size(f);
@@ -49,8 +49,10 @@ f_copy = f;
 %     end
 % end
 % subplot(1,2,2)
-% imshow(f_out,[])
-function [a,h,v,d] = my_dwt2(x,varargin)
+% max_f_out = max(f_out,[],'all'); min_f_out = min(f_out,[],'all');
+% f_out = uint8(round((f_out - min_f_out)/(max_f_out-min_f_out)*255));
+% imshow(f_out)
+function [a,h,v,d] = my_dwt2(x)
 %DWT2 Single-level discrete 2-D wavelet transform.
 Lo_D = [sqrt(0.5),sqrt(0.5)];
 Hi_D = [-sqrt(0.5),sqrt(0.5)];

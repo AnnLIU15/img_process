@@ -66,13 +66,7 @@ Complex* dct_windows(const int32_t ptr_power_idx, const uint8_t is_real);
 
 BmpImage* dwt(const BmpImage* data_ptr);
 
-Complex* dwt_CA(const Complex* data_ptr, const int32_t in_height, const int32_t in_width);
-
-Complex* dwt_CH(const Complex* data_ptr, const int32_t in_height, const int32_t in_width);
-
-Complex* dwt_CV(const Complex* data_ptr, const int32_t in_height, const int32_t in_width);
-
-Complex* dwt_CD(const Complex* data_ptr, const int32_t in_height, const int32_t in_width);
+Complex* dwt2D(const Complex* data_ptr, const int32_t in_height, const int32_t in_width);
 
 Complex* convdown2d(const Complex* data_ptr, const Complex* conv_kernel, const uint8_t* kernel_size, const int32_t* length, const int32_t* first, const int32_t* last);
 

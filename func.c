@@ -1723,31 +1723,139 @@ Complex* dct_windows(const int32_t ptr_power_idx, const uint8_t is_real)
 
 BmpImage* dwt(const BmpImage* data_ptr)
 {
+	Complex* tmp_ptr = (Complex*)malloc(sizeof(Complex));
+	Complex* complex_ptr = NULL;
+	BmpImage* out_ptr = copyBmpImagePtr(data_ptr, 0);
+	int32_t pixel_num = data_ptr->info_header->bi_height * data_ptr->info_header->bi_width;
+	int32_t i, max_var, min_var;
+	tmp_ptr->real = (double_t*)malloc(sizeof(double_t) * pixel_num);
+	tmp_ptr->imag = (double_t*)malloc(sizeof(double_t) * pixel_num);
+	for (i = pixel_num - 1; i >= 0; i--)
+	{
+		*(tmp_ptr->real + i) = *(data_ptr->DATA + i);
+		*(tmp_ptr->imag + i) = 0;
+	}
+	complex_ptr = dwt2D(tmp_ptr, data_ptr->info_header->bi_height, data_ptr->info_header->bi_width);
+	min_var = 65536;
+	max_var = 0;
+	for (i = pixel_num - 1; i >= 0; i--)
+	{
+		*(out_ptr->DATA + i) =  *(tmp_ptr->real + i);
+		max_var = max_var < *(out_ptr->DATA + i) ? *(out_ptr->DATA + i) : max_var;
+		min_var = min_var > *(out_ptr->DATA + i) ? *(out_ptr->DATA + i) : min_var;
+	}
+	for (i = pixel_num - 1; i >= 0; i--)
+	{
+		*(out_ptr->DATA + i) = (uint8_t)(255.0*(*(out_ptr->DATA + i)-min_var)/(max_var-min_var+1e-15));
+	}
+	return out_ptr;
 }
 
-Complex* dwt_CA(const Complex* data_ptr, const int32_t in_height, const int32_t in_width)
+Complex* dwt2D(const Complex* data_ptr, const int32_t in_height, const int32_t in_width)
 {
+	int32_t i, j, dst_height, dst_width;
+	int32_t* length_ptr = NULL;
+	int32_t* first = NULL; int32_t* last = NULL;
+	Complex* kernel_ptr = NULL;
+	Complex* conv_out = NULL;
+	Complex* ca = NULL; Complex* ch = NULL; Complex* cv = NULL; Complex* cd = NULL;
 	Complex* out_ptr = NULL;
+	uint8_t* kernel_size = NULL;
+	uint8_t* padding = NULL;
 
+	if (1==in_height|| 1==in_width)
+	{
+		for (i = in_height * in_width - 1; i >= 0; i--)
+		{
+			*(out_ptr->real + i) = *(data_ptr->real + i);
+			*(out_ptr->imag + i) = *(data_ptr->imag + i);
+		}
+	}
+	else
+	{
+		length_ptr = (int32_t*)malloc(sizeof(int32_t) * 2); 
+		*(length_ptr) = in_height; *(length_ptr + 1) = in_width;
+		kernel_size = (uint8_t*)malloc(sizeof(uint8_t) * 2);
+		*(kernel_size) = 1; *(kernel_size + 1) = 2;
+		kernel_ptr = (Complex*)malloc(sizeof(Complex));
+		kernel_ptr->real = (double_t*)malloc(sizeof(double_t) * *(kernel_size) * *(kernel_size + 1));
+		kernel_ptr->imag = (double_t*)malloc(sizeof(double_t) * *(kernel_size) * *(kernel_size + 1));
+		*(kernel_ptr->real) = 0.707106781186548; *(kernel_ptr->imag) = 0;
+		*(kernel_ptr->real + 1) = 0.707106781186548; *(kernel_ptr->imag + 1) = 0;
+		padding = (uint8_t*)malloc(sizeof(uint8_t) * 2);
+		*(padding) = 0; *(padding + 1) = 1;
+		dst_height = in_height ;
+		dst_width = in_width + 1;
+		conv_out = Conv(data_ptr, kernel_ptr, kernel_size, length_ptr, 2, padding, 1);
+		printf("\n\nconv_out Data:\n");
+		for (i = 0; i < dst_height; i++)
+		{
+			for (j = 0; j < dst_width; j++)
+				printf("%f,%f\t", *(conv_out->real + i * dst_width + j), *(conv_out->imag + i * dst_width + j));
+			printf("\n");
+		}
+		printf("\n\n\n");
+		first = (int32_t*)malloc(sizeof(int32_t) * 2); last = (int32_t*)malloc(sizeof(int32_t) * 2);
+		*(first) = 1; *(first + 1) = 1; *(last) = dst_height; *(last + 1) = dst_width;
+		*(length_ptr) = dst_height; *(length_ptr+1) = dst_width;
+		*(kernel_size) = 2; *(kernel_size + 1) = 1;
+		ca = convdown2d(conv_out, kernel_ptr, kernel_size, length_ptr, first, last);
+		printf("%d,%d\n", dst_height >> 1, dst_width >> 1);
+		printf("\n\nca Data:\n");
+		for (i = 0; i < dst_height >> 1; i++)
+		{
+			for (j = 0; j < dst_width >> 1; j++)
+				printf("%f,%f\t", *(ca->real + i * (dst_width >> 1) + j), *(ca->imag + i * (dst_width >> 1) + j));
+			printf("\n");
+		}
+		*(kernel_ptr->real) = -0.707106781186548;
+		ch = convdown2d(conv_out, kernel_ptr, kernel_size, length_ptr, first, last);
+		printf("\n\nch Data:\n");
+		for (i = 0; i < dst_height >> 1; i++)
+		{
+			for (j = 0; j < dst_width >> 1; j++)
+				printf("%f,%f\t", *(ch->real + i * (dst_width >> 1) + j), *(ch->imag + i * (dst_width >> 1) + j));
+			printf("\n");
+		}
+		*(kernel_size) = 1; *(kernel_size + 1) = 2;
+		*(length_ptr) = in_height; *(length_ptr + 1) = in_width;
+		free_complex(conv_out);
+		conv_out = Conv(data_ptr, kernel_ptr, kernel_size, length_ptr, 2, padding, 1);
+		printf("\n\nconv_out Data:\n");
+		for (i = 0; i < dst_height; i++)
+		{
+			for (j = 0; j < dst_width; j++)
+				printf("%f,%f\t", *(conv_out->real + i * dst_width + j), *(conv_out->imag + i * dst_width + j));
+			printf("\n");
+		}
+		printf("\n\n\n");
+		*(length_ptr) = dst_height; *(length_ptr + 1) = dst_width;
+		*(kernel_size) = 2; *(kernel_size + 1) = 1;
+		cd = convdown2d(conv_out, kernel_ptr, kernel_size, length_ptr, first, last);
+		printf("\n\ncd Data:\n");
+		for (i = 0; i < dst_height >> 1; i++)
+		{
+			for (j = 0; j < dst_width >> 1; j++)
+				printf("%f,%f\t", *(cd->real + i * (dst_width >> 1) + j), *(cd->imag + i * (dst_width >> 1) + j));
+			printf("\n");
+		}
+		*(kernel_ptr->real) = 0.707106781186548;
+		cv = convdown2d(conv_out, kernel_ptr, kernel_size, length_ptr, first, last);
+		printf("\n\ncd Data:\n");
+		for (i = 0; i < dst_height >> 1; i++)
+		{
+			for (j = 0; j < dst_width >> 1; j++)
+				printf("%f,%f\t", *(cv->real + i * (dst_width >> 1) + j), *(cv->imag + i * (dst_width >> 1) + j));
+			printf("\n");
+		}
+
+
+		free(length_ptr); free(kernel_size); 
+		free_complex(kernel_ptr);
+	}
+	return out_ptr;
 }
 
-Complex* dwt_CH(const Complex* data_ptr, const int32_t in_height, const int32_t in_width)
-{
-	Complex* out_ptr = NULL;
-
-}
-
-Complex* dwt_CV(const Complex* data_ptr, const int32_t in_height, const int32_t in_width)
-{
-	Complex* out_ptr = NULL;
-
-}
-
-Complex* dwt_CD(const Complex* data_ptr, const int32_t in_height, const int32_t in_width)
-{
-	Complex* out_ptr = NULL;
-
-}
 
 Complex* convdown2d(const Complex* data_ptr, const Complex* conv_kernel, const uint8_t* kernel_size, const int32_t* length, const int32_t* first, const int32_t* last)
 {
@@ -1755,10 +1863,9 @@ Complex* convdown2d(const Complex* data_ptr, const Complex* conv_kernel, const u
 	Complex* submat_ptr = NULL;
 	Complex* conv_out = NULL;
 	uint8_t is_satisfied = 1;
-	int32_t i, j, dst_height, dst_width, is_sub;
+	int32_t i, j, dst_height, dst_width, pixel_number;
 	int32_t* dst_length = NULL;
 	int32_t* padding = NULL;
-
 	for (i = 1; i >= 0; i--)
 	{
 		if (*(first + i) < 0 || *(kernel_size + i) < 1 ||
@@ -1787,14 +1894,15 @@ Complex* convdown2d(const Complex* data_ptr, const Complex* conv_kernel, const u
 	else
 	{
 		dst_height = *(length);
-		is_sub = (*(last + 1) - *(first + 1)) % 2;
-		dst_width = (*(last + 1) - is_sub - *(first + 1)) / 2 + 1;
+
+		pixel_number = (*(last + 1) - *(first + 1)) % 2;
+		dst_width = (*(last + 1) - *(first + 1) + 1) >> 1;
 		/*printf("From (%d,%d) to (%d,%d)\n", *(length), *(length + 1), dst_height, dst_width);
 		printf("First (%d,%d) Last (%d,%d)\n", *(first), *(first + 1), *(last), *(last + 1));*/
-		is_sub = dst_height * dst_width;
+		pixel_number = dst_height * dst_width;
 		submat_ptr = (Complex*)malloc(sizeof(Complex));
-		submat_ptr->real = (double_t*)malloc(sizeof(double_t) * is_sub);
-		submat_ptr->imag = (double_t*)malloc(sizeof(double_t) * is_sub);
+		submat_ptr->real = (double_t*)malloc(sizeof(double_t) * pixel_number);
+		submat_ptr->imag = (double_t*)malloc(sizeof(double_t) * pixel_number);
 		for (i = dst_height - 1; i >= 0; i--)
 		{
 			for (j = dst_width - 1; j >= 0; j--)
@@ -1803,6 +1911,16 @@ Complex* convdown2d(const Complex* data_ptr, const Complex* conv_kernel, const u
 				*(submat_ptr->imag + i * dst_width + j) = *(data_ptr->imag + i * *(length + 1) + (j << 1) + *(first + 1));
 			}
 		}
+		/*printf("\n\n\bsub Data:\n");
+
+		for (i = 0; i < dst_height; i++)
+		{
+			for (j = 0; j < dst_width; j++)
+			{
+				printf("%f,%f\t", *(submat_ptr->real + i * dst_width + j), *(submat_ptr->imag + i * dst_width + j));
+			}			
+			printf("\n");
+		}*/
 		dst_length = (int32_t*)malloc(sizeof(int32_t) * 2);
 		*(dst_length) = dst_height; *(dst_length + 1) = dst_width;
 		padding = (int32_t*)malloc(sizeof(int32_t) * 2);
@@ -1811,7 +1929,7 @@ Complex* convdown2d(const Complex* data_ptr, const Complex* conv_kernel, const u
 		free_complex(submat_ptr);
 		*(dst_length) += (*(padding) << 1) - *(kernel_size)+1;
 		*(dst_length + 1) += (*(padding + 1) << 1) - *(kernel_size + 1) + 1;
-		/*printf("\n\n\conv_out Data:\n");
+		/*printf("\n\nconv_out Data:\n");
 		for (i = 0; i < *(dst_length); i++)
 		{
 			for (j = 0; j < *(dst_length + 1); j++)
@@ -1819,22 +1937,21 @@ Complex* convdown2d(const Complex* data_ptr, const Complex* conv_kernel, const u
 			printf("\n");
 		}
 		printf("\n\n\n");*/
-		is_sub = (*(last)-*(first)) % 2;
-		dst_height = (*(last) - is_sub - *(first)) / 2 + 1;
+		dst_height = (*(last)-*(first)+1) >> 1;
 		dst_width = *(dst_length + 1);
 		out_ptr = (Complex*)malloc(sizeof(Complex));
-		is_sub = dst_height * dst_width;
-		out_ptr->real = (double_t*)malloc(sizeof(double_t) * is_sub);
-		out_ptr->imag = (double_t*)malloc(sizeof(double_t) * is_sub);
-		// printf("Length From (%d,%d) to (%d,%d)\n", *(dst_length), *(dst_length + 1), dst_height, dst_width);
+		pixel_number = dst_height * dst_width;
+		out_ptr->real = (double_t*)malloc(sizeof(double_t) * pixel_number);
+		out_ptr->imag = (double_t*)malloc(sizeof(double_t) * pixel_number);
+		//printf("Length From (%d,%d) to (%d,%d)\n", *(dst_length), *(dst_length + 1), dst_height, dst_width);
 		for (i = dst_height - 1; i >= 0; i--)
 		{
 			for (j = dst_width - 1; j >= 0; j--)
 			{
-				is_sub = (i << 1) + *(first);
-				// printf("Data From (%d,%d) to (%d,%d)\n", is_sub, j, i, j);
-				*(out_ptr->real + i * dst_width + j) = *(conv_out->real + is_sub * dst_width + j);
-				*(out_ptr->imag + i * dst_width + j) = *(conv_out->imag + is_sub * dst_width + j);
+				pixel_number = (i << 1) + *(first);
+				//printf("Data From (%d,%d) to (%d,%d)\n", pixel_number, j, i, j);
+				*(out_ptr->real + i * dst_width + j) = *(conv_out->real + pixel_number * dst_width + j);
+				*(out_ptr->imag + i * dst_width + j) = *(conv_out->imag + pixel_number * dst_width + j);
 			}
 		}
 		/*printf("\n\n\out Data:\n");
@@ -1849,7 +1966,6 @@ Complex* convdown2d(const Complex* data_ptr, const Complex* conv_kernel, const u
 		free(dst_length); free(padding);
 	}
 	return out_ptr;
-
 }
 
 /* convolution when height or width==1 is 1D conv   stride = 1
@@ -1916,16 +2032,12 @@ Complex* Conv(const Complex* data_ptr, const Complex* conv_kernel, const uint8_t
 			padding_ptr->real = (double_t*)malloc(sizeof(double_t) * pixel_num);
 			padding_ptr->imag = (double_t*)malloc(sizeof(double_t) * pixel_num);
 			/* padding */
-			for (i = dst_height - 1; i >= 0; i--)
+			for (i = dst_height - *padding - 1; i >= *padding; i--)
 			{
-				for (j = dst_width - 1; j >= 0; j--)
+				for (j = dst_width- *(padding + 1) - 1; j >= *(padding + 1); j--)
 				{
-					is_satisfied = i >= dst_height - *(padding) || i < *(padding) ||
-						j >= dst_width - *(padding + 1) || j < *(padding + 1) ? 0 : 1;
-					*(padding_ptr->real + i * dst_width + j) = is_satisfied == 1 ?
-						*(data_ptr->real + (i - *(padding)) * *(length + 1) + j - *(padding + 1)) : 0;
-					*(padding_ptr->imag + i * dst_width + j) = is_satisfied == 1 ?
-						*(data_ptr->imag + (i - *(padding)) * *(length + 1) + j - *(padding + 1)) : 0;
+					*(padding_ptr->real + i * dst_width + j) = *(data_ptr->real + (i - *(padding)) * *(length + 1) + j - *(padding + 1));
+					*(padding_ptr->imag + i * dst_width + j) = *(data_ptr->imag + (i - *(padding)) * *(length + 1) + j - *(padding + 1));
 				}
 			}
 			if (padding_mode == 1)
@@ -1941,14 +2053,6 @@ Complex* Conv(const Complex* data_ptr, const Complex* conv_kernel, const uint8_t
 						*(padding_ptr->imag + (dst_height - 1 - i) * dst_width + j) = *(padding_ptr->imag + (dst_height - 2 - i) * dst_width + j);
 					}
 				}
-				/*printf("\n\n\n");
-				for (i =  0; i < dst_height; i++)
-				{
-					for (j = 0 ; j < dst_width; j++)
-						printf("%f,%f\t", *(padding_ptr->real + i * dst_width + j), *(padding_ptr->imag + i * dst_width + j));
-					printf("\n");
-				}
-				printf("\n\n\n");*/
 				/* for each col */
 				for (j = *(padding+1) - 1; j >= 0; j--)
 				{
@@ -1963,7 +2067,26 @@ Complex* Conv(const Complex* data_ptr, const Complex* conv_kernel, const uint8_t
 			}
 			else
 			{
-				;
+				for (i = *padding - 1; i >= 0; i--)
+				{
+					for (j = dst_width - 1; j >= 0; j--)
+					{
+						*(padding_ptr->real + i * dst_width + j) = 0;
+						*(padding_ptr->imag + i * dst_width + j) = 0;
+						*(padding_ptr->real + (dst_height - 1 - i) * dst_width + j) = 0;
+						*(padding_ptr->imag + (dst_height - 1 - i) * dst_width + j) = 0;
+					}
+				}
+				for (j = *(padding + 1) - 1; j >= 0; j--)
+				{
+					for (i = dst_height - 1; i >= 0; i--)
+					{
+						*(padding_ptr->real + i * dst_width + j) = 0;
+						*(padding_ptr->imag + i * dst_width + j) = 0;
+						*(padding_ptr->real + i * dst_width + dst_width - 1 - j) = 0;
+						*(padding_ptr->imag + i * dst_width + dst_width - 1 - j) = 0;
+					}
+				}
 			}
 			/*printf("\n\n\nPadding Data:\n");
 			for (i = 0; i < dst_height; i++)
@@ -2007,7 +2130,6 @@ Complex* Conv(const Complex* data_ptr, const Complex* conv_kernel, const uint8_t
 					*(out_ptr->imag + i * dst_width + j) = imag;
 				}
 			}
-
 		}
 		else
 		{
