@@ -9,47 +9,47 @@ clc;
 f = imread("C:/Users/zqliu/source/repos/bmpv3/data/lena512.bmp");
 f_copy = f;
 [ca,ch,cv,cd] = my_dwt2(f,'db1');
-[ca1,ch1,cv1,cd1] = dwt2(f,'db1','mode','sym');
-sum((ca-ca1)./ca1>1e-5,'all')
-sum((ch-ch1)./ch1>1e-5,'all')
-sum((cv-cv1)./cv1>1e-5,'all')
-sum((cd-cd1)./cd1>1e-5,'all')
-f_out = zeros(size(f));
-
-for i = 1:10000
-    [ca,ch,cv,cd] = dwt2(f,'haar');
-    max_ca = max(ca,[],'all'); min_ca = min(ca,[],'all');
-    f = uint8(round((ca - min_ca)/(max_ca-min_ca)*255));
-    idx = size(f);
-    f_out(1:idx(1),1:idx(2)) = ca;
-    f_out(1:idx(1),idx(2)+1:idx(2)*2) = ch;
-    f_out(idx(1)+1:2*idx(1),1:idx(2)) = cv;
-    f_out(idx(1)+1:2*idx(1),idx(2)+1:idx(2)*2) = cd;
-    if idx(1)<2 || idx(2)<2
-        break;
-    end
-end
-figure(1)
-subplot(1,2,1)
-imshow(f_out,[])
-f_out = zeros(size(f));
-f = f_copy;
-
-for i = 1:10000
-    [ca,ch,cv,cd] = my_dwt2(f,'haar');
-    max_ca = max(ca,[],'all'); min_ca = min(ca,[],'all');
-    f = uint8(round((ca - min_ca)/(max_ca-min_ca)*255));
-    idx = size(f);
-    f_out(1:idx(1),1:idx(2)) = ca;
-    f_out(1:idx(1),idx(2)+1:idx(2)*2) = ch;
-    f_out(idx(1)+1:2*idx(1),1:idx(2)) = cv;
-    f_out(idx(1)+1:2*idx(1),idx(2)+1:idx(2)*2) = cd;
-    if idx(1)<2 || idx(2)<2
-        break;
-    end
-end
-subplot(1,2,2)
-imshow(f_out,[])
+% [ca1,ch1,cv1,cd1] = dwt2(f,'db1','mode','sym');
+% sum((ca-ca1)./ca1>1e-5,'all')
+% sum((ch-ch1)./ch1>1e-5,'all')
+% sum((cv-cv1)./cv1>1e-5,'all')
+% sum((cd-cd1)./cd1>1e-5,'all')
+% f_out = zeros(size(f));
+% 
+% for i = 1:10000
+%     [ca,ch,cv,cd] = dwt2(f,'haar');
+%     max_ca = max(ca,[],'all'); min_ca = min(ca,[],'all');
+%     f = uint8(round((ca - min_ca)/(max_ca-min_ca)*255));
+%     idx = size(f);
+%     f_out(1:idx(1),1:idx(2)) = ca;
+%     f_out(1:idx(1),idx(2)+1:idx(2)*2) = ch;
+%     f_out(idx(1)+1:2*idx(1),1:idx(2)) = cv;
+%     f_out(idx(1)+1:2*idx(1),idx(2)+1:idx(2)*2) = cd;
+%     if idx(1)<2 || idx(2)<2
+%         break;
+%     end
+% end
+% figure(1)
+% subplot(1,2,1)
+% imshow(f_out,[])
+% f_out = zeros(size(f));
+% f = f_copy;
+% 
+% for i = 1:10000
+%     [ca,ch,cv,cd] = my_dwt2(f,'haar');
+%     max_ca = max(ca,[],'all'); min_ca = min(ca,[],'all');
+%     f = uint8(round((ca - min_ca)/(max_ca-min_ca)*255));
+%     idx = size(f);
+%     f_out(1:idx(1),1:idx(2)) = ca;
+%     f_out(1:idx(1),idx(2)+1:idx(2)*2) = ch;
+%     f_out(idx(1)+1:2*idx(1),1:idx(2)) = cv;
+%     f_out(idx(1)+1:2*idx(1),idx(2)+1:idx(2)*2) = cd;
+%     if idx(1)<2 || idx(2)<2
+%         break;
+%     end
+% end
+% subplot(1,2,2)
+% imshow(f_out,[])
 function [a,h,v,d] = my_dwt2(x,varargin)
 %DWT2 Single-level discrete 2-D wavelet transform.
 Lo_D = [sqrt(0.5),sqrt(0.5)];
@@ -120,15 +120,10 @@ function y = convdown(x,F,first,last)
 % y = convdown(x,F,dwtEXTM,lenEXT,first,last)
 y = x(:,first(2):2:last(2));
 y = [y(1,:);y;y(size(y,1),:)];
-% y = wextend('addrow',dwtEXTM,y,lenEXT);
-% [row,col] = size(y);
-% y1 = y';
-% z = zeros(col,row-1);
-% for ii = 1:size(z,2)
+% y = wextend('addrow',dwtEXTM,y,lenEXT); [row,col] = size(y); y1 = y'; z =
+% zeros(col,row-1); for ii = 1:size(z,2)
 %   z(:,ii) = y1(:,ii:ii+1)*F(:);
-% end
-% y = conv2(y',F(:)','valid');
-% sum((y-z)>1e-10,'all')
+% end y = conv2(y',F(:)','valid'); sum((y-z)>1e-10,'all')
 [row,col] = size(y);
 y = y';
 z = zeros(col,row-1);

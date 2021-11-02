@@ -1,5 +1,6 @@
 ﻿// bmpv3.c : 此文件包含 "main" 函数。程序执行将在此处开始并结束。
 //
+#pragma warning(disable:4996)
 #include <stdio.h>
 #include"func.h"
 int main()
@@ -169,8 +170,8 @@ int main()
    //     printf("%f+1j*(%f),", *(fft_ptr->real + i), *(fft_ptr->imag + i));
 
    // }
-   int32_t width = 4;
-   int32_t height = 6;
+   int32_t width = 512;
+   int32_t height = 512;
    int32_t length = height* width;
    int32_t is_real = 0;
    Complex* data_ptr = (Complex*)malloc(sizeof(Complex));
@@ -179,11 +180,11 @@ int main()
    printf("Origin Data:\n");
    for (int i = 0; i < length; i++)
    {
-       if (i % width == 0 && i != 0)
-           printf("\n");
+       /*if (i % width == 0 && i != 0)
+           printf("\n"); */
        *(data_ptr->real + i) = i >= length ? 0 : i;
        *(data_ptr->imag + i) = is_real == 1  ? 0 : -i;
-       printf("%f,%f\t", *(data_ptr->real + i), *(data_ptr->imag + i));
+       /*printf("%f,%f\t", *(data_ptr->real + i), *(data_ptr->imag + i));*/
    }
    uint8_t dimension = 2;
    dimension = dimension == 1 ? dimension<<1 : dimension;
@@ -205,20 +206,36 @@ int main()
    Complex* kernel_ptr = (Complex*)malloc(sizeof(Complex));
    kernel_ptr->real = (double_t*)malloc(sizeof(double_t) * *(kernel_size) * *(kernel_size + 1));
    kernel_ptr->imag = (double_t*)malloc(sizeof(double_t) * *(kernel_size) * *(kernel_size + 1));
-   *(kernel_ptr->real) = 0.707106781186548; *(kernel_ptr->imag) = -0.707106781186548;
-   *(kernel_ptr->real+1) = 0.707106781186548; *(kernel_ptr->imag+1) = 0.707106781186548;
-
-   Complex* out_ptr = Conv(data_ptr, kernel_ptr, kernel_size, length_ptr, dimension, padding,1);
+   *(kernel_ptr->real) = 0.707106781186548; *(kernel_ptr->imag) = 0;
+   *(kernel_ptr->real+1) = 0.707106781186548; *(kernel_ptr->imag+1) = 0;
+   int32_t* first = (int32_t*)malloc(sizeof(int32_t) * 2);
+   int32_t* last = (int32_t*)malloc(sizeof(int32_t) * 2);
+   *(first) = 1; *(first + 1) = 1;
+   *(last) = *(length_ptr); *(last + 1) = *(length_ptr + 1);
+   Complex* out_ptr = convdown2d(data_ptr, kernel_ptr, kernel_size, length_ptr, first, last);
+   //Complex* out_ptr = Conv(data_ptr, kernel_ptr, kernel_size, length_ptr, dimension, padding,1);
    printf("\n\n\Out Data:\n");
-   int32_t dst_height = height + (*(padding) << 1) - *(kernel_size)+1;
-   int32_t dst_width = width + (*(padding + 1) << 1) - *(kernel_size + 1) + 1;
+   int32_t dst_height = height/2;
+   int32_t dst_width = width / 2;
+  
    for (int i = 0; i < dst_height; i++)
    {
        for (int j = 0; j < dst_width; j++)
        {
-           printf("%f,%f\t", *(out_ptr->real + i* dst_width +j), *(out_ptr->imag + i * dst_width + j));
+           printf("%f,%f", *(out_ptr->real + i* dst_width +j), *(out_ptr->imag + i * dst_width + j));
        }
        printf("\n");
    }
+   /*FILE* file_ptr;
+   file_ptr = fopen("./output/data.txt", "w+");
+   for (int i = 0; i < dst_height; i++)
+   {
+       for (int j = 0; j < dst_width; j++)
+       {
+           fprintf(file_ptr,"%f+1i*(%f),", *(out_ptr->real + i* dst_width +j), *(out_ptr->imag + i * dst_width + j));
+       }
+       fprintf(file_ptr,";");
+   }
+   fclose(file_ptr);*/
 }
 

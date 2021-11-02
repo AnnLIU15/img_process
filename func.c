@@ -1749,8 +1749,106 @@ Complex* dwt_CD(const Complex* data_ptr, const int32_t in_height, const int32_t 
 
 }
 
-Complex* convdown(const Complex* data_ptr, const Complex* conv_kernel, const uint8_t* kernel_size, const uint8_t dimension, const int32_t* first, const int32_t* last)
+Complex* convdown2d(const Complex* data_ptr, const Complex* conv_kernel, const uint8_t* kernel_size, const int32_t* length, const int32_t* first, const int32_t* last)
 {
+	Complex* out_ptr = NULL;
+	Complex* submat_ptr = NULL;
+	Complex* conv_out = NULL;
+	uint8_t is_satisfied = 1;
+	int32_t i, j, dst_height, dst_width, is_sub;
+	int32_t* dst_length = NULL;
+	int32_t* padding = NULL;
+
+	for (i = 1; i >= 0; i--)
+	{
+		if (*(first + i) < 0 || *(kernel_size + i) < 1 ||
+			*(last + i) < 2 || *(length + i) < 1 ||
+			*(last + i) > *(length + i)|| *(first + i) > *(last + i))
+		{
+			is_satisfied = 0;
+		}
+		else
+		{
+			;
+		}
+	}
+	if (0 == is_satisfied)
+	{
+		printf("\nSome information is wrong! It will be show below. All of them should greater or equal to 1.\n");
+		printf("And Length>=Last>=First.\n");
+		printf("Total Dimension = %d\n", 2);
+		for (i = 1; i >= 0; i--)
+		{
+			printf("Dimension %d: kernel_size(%d) length(%d) first(%d) last(%d)\n",
+				i + 1, *(kernel_size + i), *(length + i), *(first + i), *(last + i));
+		}
+		printf("Return NULL pointer.\n");
+	}
+	else
+	{
+		dst_height = *(length);
+		is_sub = (*(last + 1) - *(first + 1)) % 2;
+		dst_width = (*(last + 1) - is_sub - *(first + 1)) / 2 + 1;
+		/*printf("From (%d,%d) to (%d,%d)\n", *(length), *(length + 1), dst_height, dst_width);
+		printf("First (%d,%d) Last (%d,%d)\n", *(first), *(first + 1), *(last), *(last + 1));*/
+		is_sub = dst_height * dst_width;
+		submat_ptr = (Complex*)malloc(sizeof(Complex));
+		submat_ptr->real = (double_t*)malloc(sizeof(double_t) * is_sub);
+		submat_ptr->imag = (double_t*)malloc(sizeof(double_t) * is_sub);
+		for (i = dst_height - 1; i >= 0; i--)
+		{
+			for (j = dst_width - 1; j >= 0; j--)
+			{
+				*(submat_ptr->real + i * dst_width + j) = *(data_ptr->real + i * *(length + 1) + (j << 1) + *(first + 1));
+				*(submat_ptr->imag + i * dst_width + j) = *(data_ptr->imag + i * *(length + 1) + (j << 1) + *(first + 1));
+			}
+		}
+		dst_length = (int32_t*)malloc(sizeof(int32_t) * 2);
+		*(dst_length) = dst_height; *(dst_length + 1) = dst_width;
+		padding = (int32_t*)malloc(sizeof(int32_t) * 2);
+		*(padding) = 1; *(padding + 1) = 0; /* row padding */
+		conv_out = Conv(submat_ptr, conv_kernel, kernel_size, dst_length, 2, padding, 1);
+		free_complex(submat_ptr);
+		*(dst_length) += (*(padding) << 1) - *(kernel_size)+1;
+		*(dst_length + 1) += (*(padding + 1) << 1) - *(kernel_size + 1) + 1;
+		/*printf("\n\n\conv_out Data:\n");
+		for (i = 0; i < *(dst_length); i++)
+		{
+			for (j = 0; j < *(dst_length + 1); j++)
+				printf("%f,%f\t", *(conv_out->real + i * *(dst_length + 1) + j), *(conv_out->imag + i * *(dst_length + 1) + j));
+			printf("\n");
+		}
+		printf("\n\n\n");*/
+		is_sub = (*(last)-*(first)) % 2;
+		dst_height = (*(last) - is_sub - *(first)) / 2 + 1;
+		dst_width = *(dst_length + 1);
+		out_ptr = (Complex*)malloc(sizeof(Complex));
+		is_sub = dst_height * dst_width;
+		out_ptr->real = (double_t*)malloc(sizeof(double_t) * is_sub);
+		out_ptr->imag = (double_t*)malloc(sizeof(double_t) * is_sub);
+		// printf("Length From (%d,%d) to (%d,%d)\n", *(dst_length), *(dst_length + 1), dst_height, dst_width);
+		for (i = dst_height - 1; i >= 0; i--)
+		{
+			for (j = dst_width - 1; j >= 0; j--)
+			{
+				is_sub = (i << 1) + *(first);
+				// printf("Data From (%d,%d) to (%d,%d)\n", is_sub, j, i, j);
+				*(out_ptr->real + i * dst_width + j) = *(conv_out->real + is_sub * dst_width + j);
+				*(out_ptr->imag + i * dst_width + j) = *(conv_out->imag + is_sub * dst_width + j);
+			}
+		}
+		/*printf("\n\n\out Data:\n");
+		for (i = 0; i < dst_height; i++)
+		{
+			for (j = 0; j < dst_width; j++)
+				printf("%f,%f\t", *(out_ptr->real + i * dst_width + j), *(out_ptr->imag + i * dst_width + j));
+			printf("\n");
+		}
+		printf("\n\n\n");*/
+		free_complex(conv_out);
+		free(dst_length); free(padding);
+	}
+	return out_ptr;
 
 }
 
@@ -1784,7 +1882,7 @@ Complex* Conv(const Complex* data_ptr, const Complex* conv_kernel, const uint8_t
 	{
 		for (i = dimension - 1; i >= 0; i--)
 		{
-			if (*(length + 1) < 1 || *(kernel_size + i) < 1)
+			if (*(length + i) < 1 || *(kernel_size + i) < 1)
 			{
 				is_satisfied = 0;
 			}
@@ -1867,14 +1965,14 @@ Complex* Conv(const Complex* data_ptr, const Complex* conv_kernel, const uint8_t
 			{
 				;
 			}
-			printf("\n\n\nPadding Data:\n");
+			/*printf("\n\n\nPadding Data:\n");
 			for (i = 0; i < dst_height; i++)
 			{
 				for (j = 0; j < dst_width; j++)
 					printf("%f,%f\t", *(padding_ptr->real + i * dst_width + j), *(padding_ptr->imag + i * dst_width + j));
 				printf("\n");
 			}
-			printf("\n\n\n");
+			printf("\n\n\n");*/
 			padding_height = dst_height;
 			padding_width = dst_width;
 			pixel_num = (int64_t)(*(padding) << 1) - *(kernel_size)+1;
@@ -1885,7 +1983,7 @@ Complex* Conv(const Complex* data_ptr, const Complex* conv_kernel, const uint8_t
 			out_ptr = (Complex*)malloc(sizeof(Complex));
 			out_ptr->real = (double_t*)malloc(sizeof(double_t) * pixel_num);
 			out_ptr->imag = (double_t*)malloc(sizeof(double_t) * pixel_num);
-			printf("Out (%d,%d)->(%d,%d)\n", *(length), *(length + 1), dst_height, dst_width);
+			//printf("Out (%d,%d)->(%d,%d)\n", *(length), *(length + 1), dst_height, dst_width);
 			for (i = dst_height - 1; i >= 0; i--)
 			{
 				for (j = dst_width - 1; j >= 0; j--)
