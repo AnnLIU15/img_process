@@ -4,7 +4,6 @@
  *  Created on: 2021-10-13
  *      Author: Ann
  */
-
 #ifndef FUNC_H_
 #define FUNC_H_
 #include"bmpInfo.h"
