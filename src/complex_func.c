@@ -1,4 +1,4 @@
-#include"complex_func.h"
+#include"../include/complex_func.h"
 
 /* slow transpose(may develop in the future if I remember it)
  * data_ptr(inout): matrix

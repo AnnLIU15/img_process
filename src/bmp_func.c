@@ -1,12 +1,12 @@
 #pragma warning(disable:4996)
-#include "bmp_func.h"
+#include "../include/bmp_func.h"
 
 /* base function */
 
 /* read BMP data
  * img_path(in): file path
  */
-BmpImage* read(const char* img_path)
+BmpImage* read(const char* img_path,const uint8_t is_show)
 {
 	BmpImage* data_ptr = (BmpImage*)malloc(sizeof(BmpImage));
 	data_ptr->file_header = (BITMAPFILEHEADER*)malloc(sizeof(BITMAPFILEHEADER));
@@ -19,14 +19,19 @@ BmpImage* read(const char* img_path)
 	printf("Reading path: %s\n", img_path);
 	fread(data_ptr->file_header, sizeof(BITMAPFILEHEADER), 1, file_ptr);
 	fread(data_ptr->info_header, sizeof(BITMAPINFOHEADER), 1, file_ptr);
+	if(0!=is_show)
+	{
+		showInfo(data_ptr->file_header, data_ptr->info_header);
+		//printf("\n\n\ndata_ptr->info_header->bi_bit_count:%d", data_ptr->info_header->bi_bit_count);
+	}
+	else { ; }
+	//exit(-1);
 	if ((!file_ptr) || data_ptr->file_header->bf_type != 19778)
 	{
 		printf("It is not BMP file or haven't open file! Please check your input!\n");
-		exit(-10);
 	}
 	else
 	{
-		showInfo(data_ptr->file_header, data_ptr->info_header);
 		src_height = data_ptr->info_header->bi_height;
 		src_width = data_ptr->info_header->bi_width;
 		offset_address = 4 - (src_width % 4); /* symmetry */
@@ -70,6 +75,25 @@ BmpImage* read(const char* img_path)
 			}
 			free(offset_data);
 
+		}
+		else if (1 == data_ptr->info_header->bi_bit_count) // 2 color pic
+		{
+			fread(data_ptr->ColorPalette, sizeof(BITMAPColorPalette), 256, file_ptr);
+			data_ptr->DATA = (uint8_t*)malloc(sizeof(uint8_t) * src_height * src_width);
+			offset_data = (uint8_t*)malloc(sizeof(uint8_t) * offset_address);
+			for (i = src_height - 1; i >= 0; i--)
+			{
+				fread((uint8_t*)(data_ptr->DATA + i * src_width), sizeof(uint8_t), src_width, file_ptr);
+				if (offset_address != 4)
+				{
+					fread(offset_data, sizeof(uint8_t), offset_address, file_ptr);
+				}
+				else
+				{
+					;
+				}
+			}
+			free(offset_data);
 		}
 		else
 		{

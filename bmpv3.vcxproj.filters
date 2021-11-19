@@ -41,21 +41,24 @@
     <Image Include="data\data4.bmp">
       <Filter>资源文件</Filter>
     </Image>
+    <Image Include="data\binary-triangle-distorted.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\data_type.h">
+    <ClInclude Include="include\bmp_func.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\bmp_func.h">
+    <ClInclude Include="include\bmpInfo.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\img_process.h">
+    <ClInclude Include="include\complex_func.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\bmpInfo.h">
+    <ClInclude Include="include\data_type.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\complex_func.h">
+    <ClInclude Include="include\img_process.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

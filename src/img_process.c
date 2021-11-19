@@ -1,4 +1,4 @@
-#include"img_process.h"
+#include"../include/img_process.h"
 /* HW1 */
 
 /* the kernel of biCubic

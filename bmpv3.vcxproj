@@ -145,17 +145,18 @@
     <ClCompile Include="src\img_process.c" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="data\binary-triangle-distorted.bmp" />
     <Image Include="data\data2.bmp" />
     <Image Include="data\data4.bmp" />
     <Image Include="data\girl256-pepper-salt.bmp" />
     <Image Include="data\lena512.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\bmpInfo.h" />
-    <ClInclude Include="src\bmp_func.h" />
-    <ClInclude Include="src\complex_func.h" />
-    <ClInclude Include="src\data_type.h" />
-    <ClInclude Include="src\img_process.h" />
+    <ClInclude Include="include\bmpInfo.h" />
+    <ClInclude Include="include\bmp_func.h" />
+    <ClInclude Include="include\complex_func.h" />
+    <ClInclude Include="include\data_type.h" />
+    <ClInclude Include="include\img_process.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
