@@ -2,12 +2,12 @@
 //
 #pragma warning(disable:4996)
 #include <stdio.h>
-#include"func.h"
+#include"src/img_process.h"
 #include<time.h>
 int main()
 {
     /* HW1 */
-    /*{
+    {
     const char* hw1_in = "./data/lena512.bmp";
     const char* hw1_out_nearest = "./output/lena512_nearest.bmp";
     const char* hw1_out_bilinear = "./output/lena512_bilinear.bmp";
@@ -24,10 +24,10 @@ int main()
     free_ptr(bilinear_interpolation);
     free_ptr(bicubic_interpolation);
     free_ptr(reader);
-    }*/
+    }
 
     /* HW2 */
-    /*{
+    {
     const char* hw2_in = "./data/data2.bmp";
     const char* hw2_out = "./output/data2_processed.bmp";
     BmpImage* reader = read(hw2_in);
@@ -35,10 +35,10 @@ int main()
     save(hw2_out, histogram_interpolation);
     free_ptr(histogram_interpolation);
     free_ptr(reader);
-    }*/
+    }
 
     /* HW3 */
-    /*{
+   {
     const char* hw3_in = "./data/girl256-pepper-salt.bmp";
     const char* hw3_out_1_3 = "./output/girl256-pepper-salt_processed(median-kernel=3).bmp";
     const char* hw3_out_1_5 = "./output/girl256-pepper-salt_processed(median-kernel=5).bmp";
@@ -80,10 +80,10 @@ int main()
     save(hw3_out_2_6, Gaussian);
     free_ptr(Gaussian);
     free_ptr(reader);
-    }*/
+    }
 
     /* HW4 */
-    /*{
+    {
     const char* hw4_in = "./data/data4.bmp";
     const char* hw4_out = "./output/data4_processed.bmp";
     BmpImage* reader = read(hw4_in);
@@ -91,7 +91,7 @@ int main()
     save(hw4_out, histogram_interpolation);
     free_ptr(histogram_interpolation);
     free_ptr(reader); 
-    }*/
+    }
 
     /* HW5 */
     {

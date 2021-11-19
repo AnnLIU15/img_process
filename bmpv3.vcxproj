@@ -140,7 +140,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="bmpv3.c" />
-    <ClCompile Include="func.c" />
+    <ClCompile Include="src\bmp_func.c" />
+    <ClCompile Include="src\complex_func.c" />
+    <ClCompile Include="src\img_process.c" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\data2.bmp" />
@@ -149,8 +151,11 @@
     <Image Include="data\lena512.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="bmpInfo.h" />
-    <ClInclude Include="func.h" />
+    <ClInclude Include="src\bmpInfo.h" />
+    <ClInclude Include="src\bmp_func.h" />
+    <ClInclude Include="src\complex_func.h" />
+    <ClInclude Include="src\data_type.h" />
+    <ClInclude Include="src\img_process.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
