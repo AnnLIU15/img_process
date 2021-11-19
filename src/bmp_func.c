@@ -1,6 +1,5 @@
 #pragma warning(disable:4996)
 #include "../include/bmp_func.h"
-
 /* base function */
 
 /* read BMP data
@@ -11,7 +10,7 @@ BmpImage* read(const char* img_path,const uint8_t is_show)
 	BmpImage* data_ptr = (BmpImage*)malloc(sizeof(BmpImage));
 	data_ptr->file_header = (BITMAPFILEHEADER*)malloc(sizeof(BITMAPFILEHEADER));
 	data_ptr->info_header = (BITMAPINFOHEADER*)malloc(sizeof(BITMAPINFOHEADER));
-	int32_t i;
+	int32_t i, j;
 	int32_t src_height, src_width, offset_address;
 	int64_t equal_width, equal_offset_address;
 	uint8_t* offset_data;
@@ -25,7 +24,6 @@ BmpImage* read(const char* img_path,const uint8_t is_show)
 		//printf("\n\n\ndata_ptr->info_header->bi_bit_count:%d", data_ptr->info_header->bi_bit_count);
 	}
 	else { ; }
-	//exit(-1);
 	if ((!file_ptr) || data_ptr->file_header->bf_type != 19778)
 	{
 		printf("It is not BMP file or haven't open file! Please check your input!\n");
@@ -35,6 +33,7 @@ BmpImage* read(const char* img_path,const uint8_t is_show)
 		src_height = data_ptr->info_header->bi_height;
 		src_width = data_ptr->info_header->bi_width;
 		offset_address = 4 - (src_width % 4); /* symmetry */
+	
 		equal_width = src_width * 3;
 		equal_offset_address = offset_address * 3;
 		if (8 == data_ptr->info_header->bi_bit_count) // 1 channel
@@ -78,26 +77,41 @@ BmpImage* read(const char* img_path,const uint8_t is_show)
 		}
 		else if (1 == data_ptr->info_header->bi_bit_count) // 2 color pic
 		{
-			fread(data_ptr->ColorPalette, sizeof(BITMAPColorPalette), 256, file_ptr);
-			data_ptr->DATA = (uint8_t*)malloc(sizeof(uint8_t) * src_height * src_width);
-			offset_data = (uint8_t*)malloc(sizeof(uint8_t) * offset_address);
+			fread(data_ptr->ColorPalette, sizeof(uint8_t), 8, file_ptr);
+			equal_width = src_width >> 3;
+			data_ptr->DATA = (uint8_t*)malloc(sizeof(uint8_t) * src_height * equal_width);
+			offset_data = (uint8_t*)malloc(sizeof(uint8_t)* offset_address);
 			for (i = src_height - 1; i >= 0; i--)
 			{
-				fread((uint8_t*)(data_ptr->DATA + i * src_width), sizeof(uint8_t), src_width, file_ptr);
+				for (j = equal_width - 1; j >= 0; j--)
+				{
+					fread((data_ptr->DATA + i * equal_width + j), sizeof(uint8_t), 1, file_ptr);
+					//printf("%x,%x\t", one_bit_tmp, *(data_ptr->DATA + i * equal_width + j));
+				}
+				
 				if (offset_address != 4)
 				{
-					fread(offset_data, sizeof(uint8_t), offset_address, file_ptr);
+					fread(offset_data, sizeof(uint8_t), 1, file_ptr);
 				}
 				else
 				{
 					;
 				}
+				//printf("\n");
 			}
+			/*for (i = 0; i < 100; i++)
+			{
+				fread(&one_bit_tmp, sizeof(uint8_t), 1, file_ptr);
+				printf("%x\t", one_bit_tmp);
+			}*/
+			
 			free(offset_data);
+			
+			
 		}
 		else
 		{
-			;
+			printf("current version is not supported %d-bit BMP!\n", data_ptr->info_header->bi_bit_count);
 		}
 	}
 	fclose(file_ptr);
@@ -214,8 +228,7 @@ void save(const char* save_path, BmpImage* data_ptr)
 	int32_t dst_width = data_ptr->info_header->bi_width;
 	int32_t symmetry_width = (dst_width * 8 + 31) >> 5 << 2;
 	int64_t equal_width, equal_offset_address;
-
-	int32_t i;
+	int32_t i,j ;
 	if (!file_ptr)
 	{
 		printf("Can't create the bmp file!\n");
@@ -278,9 +291,38 @@ void save(const char* save_path, BmpImage* data_ptr)
 		}
 		free(offset_data);
 	}
+	else if (1 == data_ptr->info_header->bi_bit_count) // 2 color pic
+	{
+		data_ptr->info_header->bi_size_image = (symmetry_width * dst_height)>>3;
+		data_ptr->file_header->bf_size = data_ptr->file_header->bf_off_bits + data_ptr->info_header->bi_size_image;
+		/* write header*/
+		fwrite(data_ptr->file_header, sizeof(BITMAPFILEHEADER), 1, file_ptr);
+		fwrite(data_ptr->info_header, sizeof(BITMAPINFOHEADER), 1, file_ptr);
+		/* write color palette */
+		fwrite(&data_ptr->ColorPalette, sizeof(uint8_t), 8, file_ptr);
+		offset_address = 4 - (dst_width % 4); /* symmetry */
+		offset_data = (uint8_t*)malloc(sizeof(uint8_t) * offset_address);
+		equal_width = dst_width >> 3;
+		for (i = offset_address - 1; i >= 0; i--)
+			*(offset_data + i) = 0;
+		for (i = dst_height - 1; i >= 0; i--)
+		{
+			for (j = equal_width - 1; j >= 0; j--)
+			{
+				fwrite((data_ptr->DATA + i * equal_width + j), sizeof(uint8_t), 1, file_ptr);
+			}
+			if (offset_address != 4)
+				fwrite(offset_data, sizeof(uint8_t), offset_address, file_ptr);
+			else
+			{
+				;
+			}
+		}
+		free(offset_data);
+	}
 	else
 	{
-		;
+		printf("current version is not supported %d-bit BMP!\n", data_ptr->info_header->bi_bit_count);
 	}
 	fclose(file_ptr);
 }

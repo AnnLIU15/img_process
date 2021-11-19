@@ -794,3 +794,70 @@ BmpImage* dwt(const BmpImage* data_ptr)
 	return out_ptr;
 }
 
+/* HW6 */
+
+BmpImage* get_boundary(const BmpImage* data_ptr)
+{
+	BmpImage* out_ptr = copyBmpImagePtr(data_ptr, 0);
+	uint8_t* full_data = divide_uint8_data(data_ptr);
+	uint8_t* corrosion_arr = corrosion(full_data, data_ptr->info_header->bi_height, data_ptr->info_header->bi_width, 3);
+	back2BmpImage(out_ptr, corrosion_arr);
+	return out_ptr;
+}
+
+
+uint8_t* divide_uint8_data(const BmpImage* data_ptr)
+{
+	int32_t src_width = data_ptr->info_header->bi_width;
+	int32_t src_height = data_ptr->info_header->bi_height;
+	int32_t equal_width = src_width >> 3;
+	uint8_t* DATA = (uint8_t*)malloc(sizeof(uint8_t) * src_width * src_height);
+	int32_t i, j, idx;
+	uint8_t get_one = 0x01;
+	uint8_t k, data_img;
+	for (i = src_height - 1; i >= 0; i--)
+	{
+		for (j = equal_width - 1; j >= 0; j--)
+		{
+			data_img = *(data_ptr->DATA + i * equal_width + j);
+			idx = i * src_width + (j << 3);
+			for (k = 7; k >= 0; k--)
+			{
+				*(DATA + idx + k) = (data_img >> k) & get_one;
+			}
+		}
+	}
+	return DATA;
+}
+
+uint8_t* corrosion(const uint8_t* data, const int32_t height, const int32_t width, const int32_t kernel)
+{
+
+}
+
+uint8_t* get_boundary(const uint8_t* data, const uint8_t* corrosion_arr, const int32_t height, const int32_t width)
+{
+
+}
+
+void back2BmpImage(BmpImage* data_ptr, const uint8_t* DATA)
+{
+	int32_t src_width = data_ptr->info_header->bi_width;
+	int32_t src_height = data_ptr->info_header->bi_height;
+	int32_t equal_width = src_width >> 3;
+	int32_t i, j, idx;
+	uint8_t k;
+	for (i = src_height - 1; i >= 0; i--)
+	{
+		for (j = equal_width - 1; j >= 0; j--)
+		{
+			*(data_ptr->DATA + i * equal_width + j) = 0;
+			idx = i * src_width + (j << 3);
+			for (k = 7; k >= 0; k--)
+			{
+				*(data_ptr->DATA + i * equal_width + j) += (*(DATA + idx + k) << k);
+			}
+		}
+	}
+}
+

@@ -119,17 +119,15 @@ int main()
     free_ptr(dwt_pointer);
     free_ptr(reader);
     }*/
-
+    
     /* HW6 */
-  // {
-  // const char* hw6_in = "./data/binary-triangle-distorted.bmp";
-  // const char* hw6_out = "./output/binary-triangle-distorted_boundary.bmp";
-  // BmpImage* reader = read(hw6_in,1);
-  //// BmpImage* nearest_interpolation = interpolation(reader, 0, 1.5);
+   {
+   const char* hw6_in = "./data/binary-triangle-distorted.bmp";
+   const char* hw6_out = "./output/binary-triangle-distorted_boundary.bmp";
+   BmpImage* reader = read(hw6_in,1);
 
-  // //save(hw6_out, nearest_interpolation);
-  // //free_ptr(nearest_interpolation);
-  // free_ptr(reader);
-  //  }
+   save(hw6_out, reader);
+   free_ptr(reader);
+    }
 }
 
