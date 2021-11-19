@@ -271,9 +271,9 @@ const void showInfo(const PBITMAPFILEHEADER file_header, const PBITMAPINFOHEADER
 	printf("#####################################################################\
 \nBit Map File Header:\n");
 	printf("\tBMP BM:%d\n", file_header->bf_type);
-	printf("\tBMP bitmap file size(Kb)：%f\n", (file_header->bf_size / 1024.0));
-	printf("\t0 reserved Byte(Must be 0)：%d\n", file_header->bf_reserved_0);
-	printf("\t1 reserved Byte(Must be 0)：%d\n", file_header->bf_reserved_1);
+	printf("\tBMP bitmap file size(Kb):%f\n", (file_header->bf_size / 1024.0));
+	printf("\t0 reserved Byte(Must be 0):%d\n", file_header->bf_reserved_0);
+	printf("\t1 reserved Byte(Must be 0):%d\n", file_header->bf_reserved_1);
 	printf("\tThe actual offset Bytes of bitmap data: %d\n", file_header->bf_off_bits);
 	/*
 	显示BMP信息头信息
