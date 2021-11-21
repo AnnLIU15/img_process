@@ -137,6 +137,7 @@ BmpImage* copyBmpImagePtr(const BmpImage* data_ptr, const uint8_t copy_data)
 {
 	/* file_header */
 	int32_t i, j;
+	int32_t equal_width;
 	BmpImage* new_ptr = (BmpImage*)malloc(sizeof(BmpImage));
 	new_ptr->file_header = (BITMAPFILEHEADER*)malloc(sizeof(BITMAPFILEHEADER));
 	new_ptr->info_header = (BITMAPINFOHEADER*)malloc(sizeof(BITMAPINFOHEADER));
@@ -166,14 +167,38 @@ BmpImage* copyBmpImagePtr(const BmpImage* data_ptr, const uint8_t copy_data)
 	{
 		if (copy_data != 255)
 		{
+			equal_width = new_ptr->info_header->bi_height * 3;
 			new_ptr->DATA = (uint8_t*)malloc(sizeof(uint8_t) * new_ptr->info_header->bi_width
-				* new_ptr->info_header->bi_height * 3);
+				* equal_width);
 			for (i = new_ptr->info_header->bi_height - 1; i >= 0; i--)
 			{
-				for (j = new_ptr->info_header->bi_width * 3 - 1; j >= 0; j--)
+				for (j = equal_width - 1; j >= 0; j--)
 				{
-					*(new_ptr->DATA + i * new_ptr->info_header->bi_width * 3 + j) = copy_data == 0 ? 0 :
-						*(data_ptr->DATA + i * new_ptr->info_header->bi_width * 3 + j);
+					*(new_ptr->DATA + i * equal_width + j) = copy_data == 0 ? 0 :
+						*(data_ptr->DATA + i * equal_width + j);
+				}
+			}
+		}
+		else
+		{
+			;
+		}
+	}
+	else if (1 == data_ptr->info_header->bi_bit_count)
+	{
+		if (copy_data != 255)
+		{
+			for (int32_t i = 1; i >= 0; i--)
+				new_ptr->ColorPalette[i] = data_ptr->ColorPalette[i];
+			equal_width = new_ptr->info_header->bi_height >> 3;
+			new_ptr->DATA = (uint8_t*)malloc(sizeof(uint8_t) * new_ptr->info_header->bi_width
+				* equal_width);
+			for (i = new_ptr->info_header->bi_height - 1; i >= 0; i--)
+			{
+				for (j = equal_width - 1; j >= 0; j--)
+				{
+					*(new_ptr->DATA + i * equal_width + j) = copy_data == 0 ? 0 :
+						*(data_ptr->DATA + i * equal_width + j);
 				}
 			}
 		}

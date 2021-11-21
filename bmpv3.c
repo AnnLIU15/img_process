@@ -125,9 +125,11 @@ int main()
    const char* hw6_in = "./data/binary-triangle-distorted.bmp";
    const char* hw6_out = "./output/binary-triangle-distorted_boundary.bmp";
    BmpImage* reader = read(hw6_in,1);
+   BmpImage* dilate_p = get_boundary(reader);
+   save(hw6_out, dilate_p);
 
-   save(hw6_out, reader);
    free_ptr(reader);
-    }
+   free_ptr(dilate_p);
+   }
 }
 

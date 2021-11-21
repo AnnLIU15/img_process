@@ -1,4 +1,6 @@
 #include"../include/img_process.h"
+#pragma warning(disable:4996)
+
 /* HW1 */
 
 /* the kernel of biCubic
@@ -798,55 +800,99 @@ BmpImage* dwt(const BmpImage* data_ptr)
 
 BmpImage* get_boundary(const BmpImage* data_ptr)
 {
-	BmpImage* out_ptr = copyBmpImagePtr(data_ptr, 0);
-	uint8_t* full_data = divide_uint8_data(data_ptr);
-	uint8_t* corrosion_arr = corrosion(full_data, data_ptr->info_header->bi_height, data_ptr->info_header->bi_width, 3);
-	back2BmpImage(out_ptr, corrosion_arr);
+	BmpImage* out_ptr = dilate(data_ptr, 3);
+	int32_t i;
+	int32_t src_width = data_ptr->info_header->bi_width;
+	int32_t src_height = data_ptr->info_header->bi_height;
+	for (i = src_height * (src_width >> 3) - 1; i > 0; i--)
+	{
+		//printf("(%x,%x,%x)\t", *(out_ptr->DATA + i), *(data_ptr->DATA + i), ~(*(out_ptr->DATA + i)^ *(data_ptr->DATA + i)));
+		
+		*(out_ptr->DATA+i)=~(*(out_ptr->DATA + i)^ *(data_ptr->DATA + i));
+		
+	}
 	return out_ptr;
 }
 
+BmpImage* dilate(const BmpImage* data_ptr, const int32_t kernel)
+{
+	BmpImage* out_ptr = copyBmpImagePtr(data_ptr, 0);
+	int32_t src_width = data_ptr->info_header->bi_width;
+	int32_t src_height = data_ptr->info_header->bi_height;
+	uint8_t* normal_data;
+	uint8_t* dilate_data;
+	uint8_t get_idx;
+	if (1 == data_ptr->info_header->bi_bit_count)
+	{
+		normal_data = image2arr(data_ptr);
+		dilate_data = dilate_u8(normal_data, src_height, src_width,1);
+		back2BmpImage(out_ptr, dilate_data);
+	}
+	else 
+	{
+		printf("current version is not supported %d-bit BMP!\n", data_ptr->info_header->bi_bit_count);
+	}
 
-uint8_t* divide_uint8_data(const BmpImage* data_ptr)
+	return out_ptr;
+}
+
+uint8_t* dilate_u8(const uint8_t* DATA, const int32_t src_height, const int32_t src_width, const uint8_t kernel)
+{
+	int32_t i, j;
+	int32_t idx1, idx2, idx3, idx4,idx;
+	uint8_t* out_data = (uint8_t*)malloc(sizeof(uint8_t) * src_height * src_width);
+	for (i = src_height - 1; i >= 0; i--)
+	{
+		for (j = src_width - 1; j >= 0; j--)
+		{
+			idx = i * src_width + j;
+			idx1 = (i - 1) > 0 ? (i - 1) * src_width +j : 0;
+			idx2 = (i + 1) < src_height ? (i + 1) * src_width +j : (src_height-1) * src_width + j;
+			idx3 = (j - 1) > 0 ? i * src_width + j - 1 : i * src_width;
+			idx4 = (j + 1) < src_width ? i * src_width + j + 1 : i * src_width + src_width - 1;
+			if (*(DATA + idx)==1 || *(DATA + idx1) == 1 ||
+				*(DATA + idx2) == 1 || *(DATA + idx3) == 1 || *(DATA + idx4) == 1)
+			{
+				*(out_data + idx) = 1;
+			}
+			else
+			{
+				*(out_data + idx) = 0;
+			}
+		}
+	}
+	return out_data;
+}
+
+
+uint8_t* image2arr(const BmpImage* data_ptr) 
 {
 	int32_t src_width = data_ptr->info_header->bi_width;
 	int32_t src_height = data_ptr->info_header->bi_height;
 	int32_t equal_width = src_width >> 3;
+	int32_t i, j, k, idx;
 	uint8_t* DATA = (uint8_t*)malloc(sizeof(uint8_t) * src_width * src_height);
-	int32_t i, j, idx;
-	uint8_t get_one = 0x01;
-	uint8_t k, data_img;
 	for (i = src_height - 1; i >= 0; i--)
 	{
 		for (j = equal_width - 1; j >= 0; j--)
 		{
-			data_img = *(data_ptr->DATA + i * equal_width + j);
 			idx = i * src_width + (j << 3);
 			for (k = 7; k >= 0; k--)
 			{
-				*(DATA + idx + k) = (data_img >> k) & get_one;
+				*(DATA + idx + k) = (*(data_ptr->DATA + i * equal_width + j)>>k)&0x01;
 			}
 		}
 	}
 	return DATA;
 }
 
-uint8_t* corrosion(const uint8_t* data, const int32_t height, const int32_t width, const int32_t kernel)
-{
-
-}
-
-uint8_t* get_boundary(const uint8_t* data, const uint8_t* corrosion_arr, const int32_t height, const int32_t width)
-{
-
-}
 
 void back2BmpImage(BmpImage* data_ptr, const uint8_t* DATA)
 {
 	int32_t src_width = data_ptr->info_header->bi_width;
 	int32_t src_height = data_ptr->info_header->bi_height;
 	int32_t equal_width = src_width >> 3;
-	int32_t i, j, idx;
-	uint8_t k;
+	int32_t i, j, k, idx;
 	for (i = src_height - 1; i >= 0; i--)
 	{
 		for (j = equal_width - 1; j >= 0; j--)

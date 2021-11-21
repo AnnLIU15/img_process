@@ -32,11 +32,11 @@ BmpImage* dwt(const BmpImage* data_ptr);
 
 BmpImage* get_boundary(const BmpImage* data_ptr);
 
-uint8_t* divide_uint8_data(const BmpImage* data_ptr);
+BmpImage* dilate(const BmpImage* data_ptr, const int32_t kernel);
 
-uint8_t* corrosion(const uint8_t* data, const int32_t height, const int32_t width, const int32_t kernel);
+uint8_t* dilate_u8(const uint8_t* DATA, const int32_t src_height, const int32_t src_width, const uint8_t kernel);
 
-uint8_t* get_boundary(const uint8_t* data, const uint8_t* corrosion_arr, const int32_t height, const int32_t width);
+uint8_t* image2arr(const BmpImage* data_ptr);
 
 void back2BmpImage(BmpImage* data_ptr,const uint8_t* DATA);
 
