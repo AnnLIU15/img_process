@@ -807,9 +807,7 @@ BmpImage* get_boundary(const BmpImage* data_ptr)
 	for (i = src_height * (src_width >> 3) - 1; i > 0; i--)
 	{
 		//printf("(%x,%x,%x)\t", *(out_ptr->DATA + i), *(data_ptr->DATA + i), ~(*(out_ptr->DATA + i)^ *(data_ptr->DATA + i)));
-		
 		*(out_ptr->DATA+i)=~(*(out_ptr->DATA + i)^ *(data_ptr->DATA + i));
-		
 	}
 	return out_ptr;
 }
@@ -827,6 +825,8 @@ BmpImage* dilate(const BmpImage* data_ptr, const int32_t kernel)
 		normal_data = image2arr(data_ptr);
 		dilate_data = dilate_u8(normal_data, src_height, src_width,1);
 		back2BmpImage(out_ptr, dilate_data);
+		free(normal_data);
+		free(dilate_data);
 	}
 	else 
 	{
@@ -861,6 +861,7 @@ uint8_t* dilate_u8(const uint8_t* DATA, const int32_t src_height, const int32_t 
 			}
 		}
 	}
+	/* Ð´·¨¶þ https://www.cnblogs.com/hrlnw/p/5044402.html */
 	return out_data;
 }
 
