@@ -33,9 +33,6 @@ BmpImage* read(const char* img_path,const uint8_t is_show)
 		src_height = data_ptr->info_header->bi_height;
 		src_width = data_ptr->info_header->bi_width;
 		offset_address = 4 - (src_width % 4); /* symmetry */
-	
-		equal_width = src_width * 3;
-		equal_offset_address = offset_address * 3;
 		if (8 == data_ptr->info_header->bi_bit_count) // 1 channel
 		{
 			fread(data_ptr->ColorPalette, sizeof(BITMAPColorPalette), 256, file_ptr);
@@ -57,7 +54,9 @@ BmpImage* read(const char* img_path,const uint8_t is_show)
 		}
 		else if (24 == data_ptr->info_header->bi_bit_count) // 3 channel
 		{
-			data_ptr->DATA = (uint8_t*)malloc(sizeof(uint8_t) * src_height * src_width * 3); // bgr電下
+			equal_width = src_width * 3;
+			equal_offset_address = offset_address * 3;
+			data_ptr->DATA = (uint8_t*)malloc(sizeof(uint8_t) * src_height * equal_width); // bgr電下
 			offset_data = (uint8_t*)malloc(sizeof(uint8_t) * equal_offset_address);
 			for (i = src_height - 1; i >= 0; i--)
 			{
@@ -167,8 +166,8 @@ BmpImage* copyBmpImagePtr(const BmpImage* data_ptr, const uint8_t copy_data)
 	{
 		if (copy_data != 255)
 		{
-			equal_width = new_ptr->info_header->bi_height * 3;
-			new_ptr->DATA = (uint8_t*)malloc(sizeof(uint8_t) * new_ptr->info_header->bi_width
+			equal_width = new_ptr->info_header->bi_width * 3;
+			new_ptr->DATA = (uint8_t*)malloc(sizeof(uint8_t) * new_ptr->info_header->bi_height
 				* equal_width);
 			for (i = new_ptr->info_header->bi_height - 1; i >= 0; i--)
 			{

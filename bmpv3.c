@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include"include/img_process.h"
 #include<time.h>
-int main()
+int main(void)
 {
     /* HW1 */
     /*{
@@ -121,7 +121,7 @@ int main()
     }*/
     
     /* HW6 */
-   {
+   /*{
    const char* hw6_in = "./data/binary-triangle-distorted.bmp";
    const char* hw6_out = "./output/binary-triangle-distorted_boundary.bmp";
    BmpImage* reader = read(hw6_in,1);
@@ -130,6 +130,6 @@ int main()
 
    free_ptr(reader);
    free_ptr(dilate_p);
-   }
+   }*/
 }
 
