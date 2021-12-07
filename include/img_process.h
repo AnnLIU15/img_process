@@ -40,4 +40,8 @@ uint8_t* image2arr(const BmpImage* data_ptr);
 
 void back2BmpImage(BmpImage* data_ptr,const uint8_t* DATA);
 
+BmpImage* local_variance_threshold(const BmpImage* data_ptr);
+
+double_t cal_std(const uint8_t* arr, const int32_t* arr_p);
+
 #endif

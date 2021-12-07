@@ -44,6 +44,9 @@
     <Image Include="data\binary-triangle-distorted.bmp">
       <Filter>资源文件</Filter>
     </Image>
+    <Image Include="data\yeast-cells.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\bmp_func.h">

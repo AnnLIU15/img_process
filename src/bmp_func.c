@@ -96,17 +96,8 @@ BmpImage* read(const char* img_path,const uint8_t is_show)
 				{
 					;
 				}
-				//printf("\n");
 			}
-			/*for (i = 0; i < 100; i++)
-			{
-				fread(&one_bit_tmp, sizeof(uint8_t), 1, file_ptr);
-				printf("%x\t", one_bit_tmp);
-			}*/
-			
 			free(offset_data);
-			
-			
 		}
 		else
 		{

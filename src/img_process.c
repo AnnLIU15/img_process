@@ -819,7 +819,6 @@ BmpImage* dilate(const BmpImage* data_ptr, const int32_t kernel)
 	int32_t src_height = data_ptr->info_header->bi_height;
 	uint8_t* normal_data;
 	uint8_t* dilate_data;
-	uint8_t get_idx;
 	if (1 == data_ptr->info_header->bi_bit_count)
 	{
 		normal_data = image2arr(data_ptr);
@@ -908,3 +907,79 @@ void back2BmpImage(BmpImage* data_ptr, const uint8_t* DATA)
 	}
 }
 
+/* HW7 */
+BmpImage* local_variance_threshold(const BmpImage* data_ptr )
+{
+	BmpImage* out_ptr = copyBmpImagePtr(data_ptr, 0);
+	int32_t src_width = data_ptr->info_header->bi_width;
+	int32_t src_height = data_ptr->info_header->bi_height;
+	double_t* std_local = (double_t*)malloc(sizeof(double_t) * src_width * src_height);
+	int32_t* power_local = (int32_t*)malloc(sizeof(double_t) * src_width * src_height);
+	uint8_t* kernel = (uint8_t*)malloc(sizeof(uint8_t)*9);
+	int32_t* kernel_p = (int32_t*)malloc(sizeof(int32_t) * 9);
+	double_t mean = 0;
+	double_t local_mean;
+	uint8_t row_limit_sub, row_limit_add, col_limit_sub, col_limit_add;
+	int32_t i, j, k;
+	for (j = 8; j >= 0; j--)
+		*(kernel + j) = 0;
+	for (j = src_height * src_width - 1; j >= 0; j--)
+		*(power_local + j) = *(data_ptr->DATA + j) * *(data_ptr->DATA + j);
+	for (i = src_height - 1; i >= 0; i--)
+	{
+		row_limit_sub = i == 0 ? 0 : 1;
+		row_limit_add = i == src_height - 1 ? 0 : 1;
+		for (j = src_width - 1; j >= 0; j--)
+		{
+			col_limit_sub = j == 0 ? 0 : 1;
+			col_limit_add = j == src_width - 1 ? 0 : 1;
+			mean += *(data_ptr->DATA + i * src_width + j);
+			*(kernel_p + 0) = *(power_local + (i - row_limit_sub) * src_width + (j - col_limit_sub));
+			*(kernel_p + 1) = *(power_local + (i)*src_width + (j - col_limit_sub));
+			*(kernel_p + 2) = *(power_local + (i + row_limit_add) * src_width + (j - col_limit_sub));
+			*(kernel_p + 3) = *(power_local + (i - row_limit_sub) * src_width + (j));
+			*(kernel_p + 4) = *(power_local + (i)*src_width + (j));
+			*(kernel_p + 5) = *(power_local + (i + row_limit_add) * src_width + (j));
+			*(kernel_p + 6) = *(power_local + (i - row_limit_sub) * src_width + (j + col_limit_add));
+			*(kernel_p + 7) = *(power_local + (i)*src_width + (j + col_limit_add));
+			*(kernel_p + 8) = *(power_local + (i + row_limit_add) * src_width + (j + col_limit_add));
+			*(kernel + 0) = *(data_ptr->DATA + (i - row_limit_sub) * src_width + (j - col_limit_sub));
+			*(kernel + 1) = *(data_ptr->DATA + (i)*src_width + (j - col_limit_sub));
+			*(kernel + 2) = *(data_ptr->DATA + (i + row_limit_add) * src_width + (j - col_limit_sub));
+			*(kernel + 3) = *(data_ptr->DATA + (i - row_limit_sub) * src_width + (j));
+			*(kernel + 4) = *(data_ptr->DATA + (i)*src_width + (j));
+			*(kernel + 5) = *(data_ptr->DATA + (i + row_limit_add) * src_width + (j));
+			*(kernel + 6) = *(data_ptr->DATA + (i - row_limit_sub) * src_width + (j + col_limit_add));
+			*(kernel + 7) = *(data_ptr->DATA + (i)*src_width + (j + col_limit_add));
+			*(kernel + 8) = *(data_ptr->DATA + (i + row_limit_add) * src_width + (j + col_limit_add));
+			*(std_local + i * src_width + j) = cal_std(kernel, kernel_p);
+		}
+	}
+	mean = mean / (src_height * src_width) * 1.5;
+	for (j = src_height * src_width - 1; j >= 0; j--)
+		*(out_ptr->DATA + j) = (*(data_ptr->DATA + j) > mean) && (*(data_ptr->DATA + j) > 30 * *(std_local + j)) ? 255 : 0;
+
+	free(std_local);
+	free(kernel);
+	free(kernel_p);
+	free(power_local);
+	return out_ptr;
+}
+
+double_t cal_std(const uint8_t* arr,const int32_t* arr_p)
+{
+	int32_t i;
+	double_t sum_up = 0;
+	double_t std_ = 0;
+	for (i = 8; i >= 0; i--)
+	{
+		sum_up += *(arr + i);
+	}
+	sum_up = -sum_up * sum_up / 9;
+	for (i = 8; i >= 0; i--)
+	{
+		sum_up+= *(arr_p + i);
+	}
+	sum_up = sqrt(sum_up / 8);
+	return sum_up;
+}

@@ -131,5 +131,16 @@ int main(void)
    free_ptr(reader);
    free_ptr(dilate_p);
    }*/
+
+    /* HW7 */
+   {
+   const char* hw7_in = "./data/yeast-cells.bmp";
+   const char* hw7_out = "./output/get_roi_yeast-cells.bmp";
+   BmpImage* reader = read(hw7_in,1);
+   BmpImage* get_roi = local_variance_threshold(reader);
+   save(hw7_out, get_roi);
+   free_ptr(reader);
+   free_ptr(get_roi);
+   }
 }
 

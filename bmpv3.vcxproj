@@ -150,6 +150,7 @@
     <Image Include="data\data4.bmp" />
     <Image Include="data\girl256-pepper-salt.bmp" />
     <Image Include="data\lena512.bmp" />
+    <Image Include="data\yeast-cells.bmp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\bmpInfo.h" />
