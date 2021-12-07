@@ -918,9 +918,8 @@ BmpImage* local_variance_threshold(const BmpImage* data_ptr )
 	uint8_t* kernel = (uint8_t*)malloc(sizeof(uint8_t)*9);
 	int32_t* kernel_p = (int32_t*)malloc(sizeof(int32_t) * 9);
 	double_t mean = 0;
-	double_t local_mean;
 	uint8_t row_limit_sub, row_limit_add, col_limit_sub, col_limit_add;
-	int32_t i, j, k;
+	int32_t i, j;
 	for (j = 8; j >= 0; j--)
 		*(kernel + j) = 0;
 	for (j = src_height * src_width - 1; j >= 0; j--)
@@ -982,4 +981,25 @@ double_t cal_std(const uint8_t* arr,const int32_t* arr_p)
 	}
 	sum_up = sqrt(sum_up / 8);
 	return sum_up;
+}
+
+
+BmpImage* segmentation_from_roi(const BmpImage* data_ptr, const BmpImage* roi_ptr)
+{
+	BmpImage* out_ptr = copyBmpImagePtr(data_ptr, 1);
+	int32_t src_width = data_ptr->info_header->bi_width;
+	int32_t src_height = data_ptr->info_header->bi_height;
+	int32_t i, j, k;
+	for (j = src_height * src_width - 1; j >= 0; j--)
+	{
+		if (*(roi_ptr->DATA + j) == 255)
+		{
+			;
+		}
+		else
+		{
+			*(out_ptr->DATA + j) = 0;
+		}
+	}
+	return out_ptr;
 }

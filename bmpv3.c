@@ -135,12 +135,16 @@ int main(void)
     /* HW7 */
    {
    const char* hw7_in = "./data/yeast-cells.bmp";
-   const char* hw7_out = "./output/get_roi_yeast-cells.bmp";
+   const char* hw7_out1 = "./output/get_roi_yeast-cells.bmp";
+   const char* hw7_out2 = "./output/get_segment_yeast-cells.bmp";
    BmpImage* reader = read(hw7_in,1);
    BmpImage* get_roi = local_variance_threshold(reader);
-   save(hw7_out, get_roi);
+   BmpImage* segmentation = segmentation_from_roi(reader, get_roi);
+   save(hw7_out1, get_roi);
+   save(hw7_out2, segmentation);
    free_ptr(reader);
    free_ptr(get_roi);
+   free_ptr(segmentation);
    }
 }
 

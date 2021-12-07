@@ -44,4 +44,6 @@ BmpImage* local_variance_threshold(const BmpImage* data_ptr);
 
 double_t cal_std(const uint8_t* arr, const int32_t* arr_p);
 
+BmpImage* segmentation_from_roi(const BmpImage* data_ptr, const BmpImage* roi_ptr);
+
 #endif
