@@ -21,10 +21,13 @@
     <ClCompile Include="src\bmp_func.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\complex_func.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
     <ClCompile Include="src\img_process.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\complex_func.c">
+    <ClCompile Include="include\img_encode.c">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -62,6 +65,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="include\img_process.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\img_encode.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

@@ -5,7 +5,7 @@
 #define _USE_MATH_DEFINES
 #include<math.h>
 #include"complex_func.h"
-
+#include"img_encode.h"
 void biCubic(float_t* x);
 
 BmpImage* interpolation(const BmpImage* data_ptr, const uint8_t type_interpolation, const float scale_factor);
@@ -46,4 +46,14 @@ double_t cal_std(const uint8_t* arr, const int32_t* arr_p);
 
 BmpImage* segmentation_from_roi(const BmpImage* data_ptr, const BmpImage* roi_ptr);
 
+/* 2021 autumn digital image process*/
+
+uint16_t* countPixelIntensity(const BmpImage* data_ptr);
+
+float_t* PixelIntensityProb(const uint16_t* cnt_ptr, const int32_t src_height, const int32_t src_width, const uint8_t type);
+
+void sortCodeWithProb(uint16_t* data_array, float_t* prob_arr, const uint64_t length);
+
+void HuffmanEncode(const BmpImage* data_ptr, const char* save_path);
+/* 2022 autumn*/
 #endif

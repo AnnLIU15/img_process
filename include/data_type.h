@@ -1,6 +1,9 @@
 #ifndef DATA_TYPE_H_
 #define DATA_TYPE_H_
-
+#define NULL ((void*)0)
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 typedef signed char        int8_t;
 typedef short              int16_t;
 typedef int                int32_t;

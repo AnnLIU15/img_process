@@ -277,6 +277,7 @@ void sort_array(uint8_t* data_array, const uint64_t length)
 	}
 }
 
+
 /*
 * 中值滤波代码
 * 输入: 图像数据	->	const BmpImage* data_ptr
@@ -1002,4 +1003,150 @@ BmpImage* segmentation_from_roi(const BmpImage* data_ptr, const BmpImage* roi_pt
 		}
 	}
 	return out_ptr;
+}
+
+/* count pixel of Intensity
+ * Input img ptr
+ * Output uint16_t* 256 Intensity Cnt
+ */
+uint16_t* countPixelIntensity(const BmpImage* data_ptr)
+{
+	
+	int32_t src_width = data_ptr->info_header->bi_width;
+	int32_t src_height = data_ptr->info_header->bi_height;
+	uint16_t* gray_cnt_ptr = (uint16_t*)malloc(sizeof(uint16_t) * 256);
+	uint8_t* tmp_data = (uint8_t*)malloc(sizeof(uint8_t) * src_width * src_height);
+	int32_t pixel_number = src_width * src_height;
+	int32_t i, j;
+
+	for (i = 255; i >= 0; i--)
+	{
+		*(gray_cnt_ptr + i) = 0;
+	}
+	if (8 == data_ptr->info_header->bi_bit_count) // 1 channel
+	{
+		/* 统计概率pdf -> gray_prob p_r(r_k)=\frac{n_k}{MN}*/
+		for (i = src_height - 1; i >= 0; i--)
+			for (j = src_width - 1; j >= 0; j--)
+				*(tmp_data + i * src_width + j) = *(data_ptr->DATA + i * src_width + j);
+
+	}
+	else if (24 == data_ptr->info_header->bi_bit_count) // 3 channel
+	{
+		HSIInfo* hsi_ptr = bgr2hsi(data_ptr);
+		for (i = src_height - 1; i >= 0; i--)
+			for (j = src_width - 1; j >= 0; j--)
+				*(tmp_data + i * src_width + j) = round(*(hsi_ptr->I_component + i * src_width + j) * 255.0);
+		free_HSI(hsi_ptr);
+	}
+	else
+	{
+		;
+	}
+	for (i = src_height - 1; i >= 0; i--)
+		for (j = src_width - 1; j >= 0; j--)
+			*(gray_cnt_ptr+(*(tmp_data + i * src_width + j))) += 1;
+	free(tmp_data);
+
+	return gray_cnt_ptr;
+}
+
+/* get prob from count pixel of Intensity
+ * Input cnt ptr/height/width/type
+ * Output uint16_t* 256 Intensity Cnt
+ */
+float_t* PixelIntensityProb(const uint16_t* cnt_ptr, const int32_t src_height, const int32_t src_width, const uint8_t type)
+{
+	float_t* gray_cnt_ptr = (float_t*)malloc(sizeof(float_t) * 256);
+	int16_t i;
+	float_t factor = 1.0 / (src_height * src_width);
+	if (1 == type) // default, length = src_height * src_width
+	{
+		for (i=255; i >= 0; i--)
+		{
+			*(gray_cnt_ptr + i) = *(cnt_ptr + i) * factor;
+
+		}
+	}
+	else
+	{
+		;
+	}
+
+	return gray_cnt_ptr;
+}
+
+
+
+/* bubble sort(smallest->largest)
+ * data_array(inout): array which should be sorted
+ * length(in): array length
+ */
+void sortCodeWithProb(uint16_t* data_array, float_t* prob_arr, const uint64_t length)
+{
+	uint8_t processed = 1;
+	int32_t largest_position = 0;
+	uint16_t tmp_data = 0;
+	float_t tmp_float_data = 0;
+	int32_t i, j;
+	for (i = length - 1; i > 0; i--)
+	{
+		processed = 0;
+		largest_position = i;
+		for (j = i - 1; j >= 0; j--)
+		{
+			if (*(data_array + largest_position) < *(data_array + j))
+			{
+				largest_position = j;
+				processed = 1;
+			}
+		}
+		if (processed == 1)
+		{
+			tmp_data = *(data_array + largest_position);
+			*(data_array + largest_position) = *(data_array + i);
+			*(data_array + i) = tmp_data;
+
+			tmp_float_data = *(prob_arr + largest_position);
+			*(prob_arr + largest_position) = *(prob_arr + i);
+			*(prob_arr + i) = tmp_float_data;
+		}
+		else
+		{
+			;
+		}
+	}
+}
+
+
+
+/* Huffman encoding 
+ */
+
+void HuffmanEncode(const BmpImage* data_ptr,const char* save_path)
+{
+	uint16_t* data_arr = countPixelIntensity(data_ptr);
+	float_t* prob_arr = PixelIntensityProb(data_arr, data_ptr->info_header->bi_height, data_ptr->info_header->bi_width, 1);
+	uint64_t gray_length = 256;
+	Prob(data_arr, prob_arr, gray_length);
+	GrayNode* node_ptr = getHuffmanTree(data_arr, gray_length);
+	const char* one_str = "1";
+	const char* zero_str = "0";
+	char* start_str = "";
+	char* right_part = (char*)malloc(sizeof(char) * 256);
+	char* left_part = (char*)malloc(sizeof(char) * 256);
+	*right_part = '\0';
+	right_part = strcat(right_part, one_str);
+
+
+	// for (i = 0; i < 16; i++)
+	// {
+	// 	//aaa = strcat(aaa, bbb);
+	// 	strcpy(ccc, aaa);
+	// 	strcat(aaa, bbb);
+	// 	strcat(ccc, ddd);
+	// 	printf("%s\t%d\t%s\n", aaa, strlen(aaa), ccc);
+	// }
+	// free(aaa);
+	// free(ccc);
 }

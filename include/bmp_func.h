@@ -1,9 +1,7 @@
 #ifndef BMP_FUNC_H_
 #define BMP_FUNC_H_
 #include"bmpInfo.h"
-#include"data_type.h"
-#include<stdio.h>
-#include<stdlib.h>
+
 BmpImage* read(const char* img_path,const uint8_t is_show);
 
 void free_ptr(BmpImage* data_ptr);
