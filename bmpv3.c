@@ -11,9 +11,9 @@ int main(void)
 	const char* hw1_out_nearest = "./output/lena512_nearest.bmp";
 	const char* hw1_out_bilinear = "./output/lena512_bilinear.bmp";
 	const char* hw1_out_bicubic = "./output/lena512_bicubic.bmp";
-	/*BmpImage* reader = read(hw1_in, 0);
-	uint16_t* test_ptr = countPixelIntensity(reader);
-	getHuffmanTree(test_ptr, 256);*/
+	BmpImage* reader = read(hw1_in, 0);
+	// uint16_t* test_ptr = countPixelIntensity(reader);
+	HuffmanEncode(reader, "aaaaaa");
 	int i = 0;
 	char* aaa = (char*)malloc(sizeof(char)*256);
 	char* ccc = (char*)malloc(sizeof(char)*256);

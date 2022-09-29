@@ -1082,12 +1082,12 @@ float_t* PixelIntensityProb(const uint16_t* cnt_ptr, const int32_t src_height, c
  * data_array(inout): array which should be sorted
  * length(in): array length
  */
-void sortCodeWithProb(uint16_t* data_array, float_t* prob_arr, const uint64_t length)
+void sortCodeWithProb(float_t* prob_arr, uint8_t* gray_level, const uint64_t length)
 {
 	uint8_t processed = 1;
 	int32_t largest_position = 0;
-	uint16_t tmp_data = 0;
 	float_t tmp_float_data = 0;
+	uint8_t tmp_uint8_data = 0;
 	int32_t i, j;
 	for (i = length - 1; i > 0; i--)
 	{
@@ -1095,7 +1095,7 @@ void sortCodeWithProb(uint16_t* data_array, float_t* prob_arr, const uint64_t le
 		largest_position = i;
 		for (j = i - 1; j >= 0; j--)
 		{
-			if (*(data_array + largest_position) < *(data_array + j))
+			if (*(prob_arr + largest_position) < *(prob_arr + j))
 			{
 				largest_position = j;
 				processed = 1;
@@ -1103,13 +1103,13 @@ void sortCodeWithProb(uint16_t* data_array, float_t* prob_arr, const uint64_t le
 		}
 		if (processed == 1)
 		{
-			tmp_data = *(data_array + largest_position);
-			*(data_array + largest_position) = *(data_array + i);
-			*(data_array + i) = tmp_data;
-
 			tmp_float_data = *(prob_arr + largest_position);
 			*(prob_arr + largest_position) = *(prob_arr + i);
 			*(prob_arr + i) = tmp_float_data;
+
+			tmp_uint8_data = *(gray_level + largest_position);
+			*(gray_level + largest_position) = *(gray_level + i);
+			*(gray_level + i) = tmp_uint8_data;
 		}
 		else
 		{
@@ -1127,16 +1127,25 @@ void HuffmanEncode(const BmpImage* data_ptr,const char* save_path)
 {
 	uint16_t* data_arr = countPixelIntensity(data_ptr);
 	float_t* prob_arr = PixelIntensityProb(data_arr, data_ptr->info_header->bi_height, data_ptr->info_header->bi_width, 1);
-	uint64_t gray_length = 256;
-	Prob(data_arr, prob_arr, gray_length);
-	GrayNode* node_ptr = getHuffmanTree(data_arr, gray_length);
-	const char* one_str = "1";
+	const uint64_t gray_length = 256;
+	uint8_t* gray_index = (uint8_t*)malloc(sizeof(uint8_t) * gray_length);
+	int16_t idx_i = gray_length -1 ;
+	for (idx_i; idx_i >= 0; idx_i--)
+	{
+		*(gray_index + idx_i) = idx_i;
+	}
+	free(data_arr);
+	
+
+	sortCodeWithProb(prob_arr, gray_index, gray_length);
+	GrayNode* node_ptr = getHuffmanTree(prob_arr, gray_index, gray_length);
+	/*const char* one_str = "1";
 	const char* zero_str = "0";
 	char* start_str = "";
 	char* right_part = (char*)malloc(sizeof(char) * 256);
 	char* left_part = (char*)malloc(sizeof(char) * 256);
 	*right_part = '\0';
-	right_part = strcat(right_part, one_str);
+	right_part = strcat(right_part, one_str);*/
 
 
 	// for (i = 0; i < 16; i++)

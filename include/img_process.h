@@ -52,7 +52,7 @@ uint16_t* countPixelIntensity(const BmpImage* data_ptr);
 
 float_t* PixelIntensityProb(const uint16_t* cnt_ptr, const int32_t src_height, const int32_t src_width, const uint8_t type);
 
-void sortCodeWithProb(uint16_t* data_array, float_t* prob_arr, const uint64_t length);
+void sortCodeWithProb(float_t* prob_arr, uint8_t* gray_level, const uint64_t length);
 
 void HuffmanEncode(const BmpImage* data_ptr, const char* save_path);
 /* 2022 autumn*/
