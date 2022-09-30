@@ -55,5 +55,7 @@ float_t* PixelIntensityProb(const uint16_t* cnt_ptr, const int32_t src_height, c
 void sortCodeWithProb(float_t* prob_arr, uint8_t* gray_level, const uint64_t length);
 
 void HuffmanEncode(const BmpImage* data_ptr, const char* save_path);
+
+void GolombEncode(const BmpImage* data_ptr, const char* save_path, const int16_t type);
 /* 2022 autumn*/
 #endif

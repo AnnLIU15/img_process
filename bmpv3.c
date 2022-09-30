@@ -8,42 +8,13 @@
 int main(void)
 {
 	const char* hw1_in = "./data/lena512.bmp";
-	const char* hw1_out_nearest = "./output/lena512_nearest.bmp";
-	const char* hw1_out_bilinear = "./output/lena512_bilinear.bmp";
+	const char* hw1_out_huffman_code_table = "./output/lena512_huffman_table.csv"; // include avg code
 	const char* hw1_out_bicubic = "./output/lena512_bicubic.bmp";
 	BmpImage* reader = read(hw1_in, 0);
 	// uint16_t* test_ptr = countPixelIntensity(reader);
-	HuffmanEncode(reader, "aaaaaa");
-	int i = 0;
-	char* aaa = (char*)malloc(sizeof(char)*256);
-	char* ccc = (char*)malloc(sizeof(char)*256);
-	const char* bbb = "0";
-	const char* ddd = "1";
-	*aaa = '\0';
-	for (i = 0; i < 16; i++)
-	{
-		//aaa = strcat(aaa, bbb);
-		strcpy(ccc, aaa);
-		strcat(aaa, bbb);
-		strcat(ccc, ddd);
-		printf("%s\t%d\t%s\n", aaa, strlen(aaa),ccc);
-	}
-	free(aaa);
-	free(ccc);
-
-	//double* gray_cnt_ptr = PixelIntensityProb(test_ptr, reader->info_header->bi_height, reader->info_header->bi_width, 1);
+	HuffmanEncode(reader, hw1_out_huffman_code_table);
 	
-	/*BmpImage* nearest_interpolation = interpolation(reader, 0, 1.5);
-	BmpImage* bilinear_interpolation = interpolation(reader, 1, 1.5);
-	BmpImage* bicubic_interpolation = interpolation(reader, 2, 1.5);*/
-
-	/*save(hw1_out_nearest, nearest_interpolation);
-	save(hw1_out_bilinear, bilinear_interpolation);
-	save(hw1_out_bicubic, bicubic_interpolation);*/
-	/*free_ptr(nearest_interpolation);
-	free_ptr(bilinear_interpolation);
-	free_ptr(bicubic_interpolation);*/
-	//free_ptr(reader);
+	free_ptr(reader);
 }
 
 /* HW1 */

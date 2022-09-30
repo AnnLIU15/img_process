@@ -1130,32 +1130,64 @@ void HuffmanEncode(const BmpImage* data_ptr,const char* save_path)
 	const uint64_t gray_length = 256;
 	uint8_t* gray_index = (uint8_t*)malloc(sizeof(uint8_t) * gray_length);
 	int16_t idx_i = gray_length -1 ;
+	float_t avg_code_len = 0;
 	for (idx_i; idx_i >= 0; idx_i--)
 	{
 		*(gray_index + idx_i) = idx_i;
 	}
 	free(data_arr);
-	
-
 	sortCodeWithProb(prob_arr, gray_index, gray_length);
 	GrayNode* node_ptr = getHuffmanTree(prob_arr, gray_index, gray_length);
-	/*const char* one_str = "1";
-	const char* zero_str = "0";
-	char* start_str = "";
-	char* right_part = (char*)malloc(sizeof(char) * 256);
-	char* left_part = (char*)malloc(sizeof(char) * 256);
-	*right_part = '\0';
-	right_part = strcat(right_part, one_str);*/
+	free(gray_index); free(prob_arr);
+	Gray* huffmanEncodeTable = getHuffmanEncodeChar(node_ptr);
+	freeGrayNode(node_ptr);
+	sortEncodeWithProb(huffmanEncodeTable, gray_length);
+	for (idx_i = gray_length - 1; idx_i >= 0; idx_i--)
+	{
+		avg_code_len += (huffmanEncodeTable + idx_i)->gray_prob *
+			strlen((huffmanEncodeTable + idx_i)->encode);
+	}
+	FILE* file_ptr = fopen(save_path, "w+");
+	if (file_ptr == NULL)
+	{
+		printf("\nsomething went wrongs while saving!\n");
+	}
+	else
+	{
+		printf("avg code len=%f\n", avg_code_len);
+		fprintf(file_ptr, "avg code len,%f\n", avg_code_len);
+		fprintf(file_ptr, "level,prob,code\n");
+		for (idx_i = gray_length - 1; idx_i >= 0; idx_i--)
+		{
+			fprintf(file_ptr, "%d,%f,%s\n", (huffmanEncodeTable + idx_i)->gray_level,
+				(huffmanEncodeTable + idx_i)->gray_prob, (huffmanEncodeTable + idx_i)->encode);
+			printf("level:%d,prob:%f,encode:%s\n", (huffmanEncodeTable + idx_i)->gray_level,
+				(huffmanEncodeTable + idx_i)->gray_prob, (huffmanEncodeTable + idx_i)->encode);
+		}
+		printf("\nSaved result to %s(csv/sep with ',')!!!\n", save_path);
+	}
+	fclose(file_ptr);
+	freeTable(huffmanEncodeTable, gray_length);
+}
+
+void GolombEncode(const BmpImage* data_ptr, const char* save_path, const int16_t type)
+{
+	uint16_t* data_arr = countPixelIntensity(data_ptr);
+	float_t* prob_arr = PixelIntensityProb(data_arr, data_ptr->info_header->bi_height, data_ptr->info_header->bi_width, 1);
+	const uint64_t gray_length = 256;
+	uint8_t* gray_index = (uint8_t*)malloc(sizeof(uint8_t) * gray_length);
+	int16_t idx_i = gray_length - 1;
+	float_t avg_code_len = 0;
+	for (idx_i; idx_i >= 0; idx_i--)
+	{
+		*(gray_index + idx_i) = idx_i;
+	}
+	free(data_arr);
+	GrayNode* node_ptr = getGolombEncode(prob_arr, gray_index, gray_length, type);
+	// before sort
+	Gray* huffmanEncodeTable = getHuffmanEncodeChar(node_ptr);
 
 
-	// for (i = 0; i < 16; i++)
-	// {
-	// 	//aaa = strcat(aaa, bbb);
-	// 	strcpy(ccc, aaa);
-	// 	strcat(aaa, bbb);
-	// 	strcat(ccc, ddd);
-	// 	printf("%s\t%d\t%s\n", aaa, strlen(aaa), ccc);
-	// }
-	// free(aaa);
-	// free(ccc);
+
+	sortCodeWithProb(prob_arr, gray_index, gray_length);
 }
