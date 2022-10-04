@@ -53,4 +53,6 @@ void freeTable(Gray* table, const int32_t length);
 
 void sortEncodeWithProb(Gray* prob_arr, const uint64_t length);
 
+Gray* getGolombEncodeChar(float_t* prob_arr, uint8_t* gray_index, const int32_t length);
+
 #endif /* IMG_ENCODE_H_ */

@@ -1078,42 +1078,75 @@ float_t* PixelIntensityProb(const uint16_t* cnt_ptr, const int32_t src_height, c
 
 
 
-/* bubble sort(smallest->largest)
+/* bubble sort(smallest->largest if type==0 else largest->smallest)
  * data_array(inout): array which should be sorted
  * length(in): array length
  */
-void sortCodeWithProb(float_t* prob_arr, uint8_t* gray_level, const uint64_t length)
+void sortCodeWithProb(float_t* prob_arr, uint8_t* gray_level, const uint64_t length, const uint8_t type)
 {
 	uint8_t processed = 1;
 	int32_t largest_position = 0;
 	float_t tmp_float_data = 0;
 	uint8_t tmp_uint8_data = 0;
 	int32_t i, j;
-	for (i = length - 1; i > 0; i--)
+	if (type == 0)
 	{
-		processed = 0;
-		largest_position = i;
-		for (j = i - 1; j >= 0; j--)
+		for (i = length - 1; i > 0; i--)
 		{
-			if (*(prob_arr + largest_position) < *(prob_arr + j))
+			processed = 0;
+			largest_position = i;
+			for (j = i - 1; j >= 0; j--)
 			{
-				largest_position = j;
-				processed = 1;
+				if (*(prob_arr + largest_position) < *(prob_arr + j))
+				{
+					largest_position = j;
+					processed = 1;
+				}
+			}
+			if (processed == 1)
+			{
+				tmp_float_data = *(prob_arr + largest_position);
+				*(prob_arr + largest_position) = *(prob_arr + i);
+				*(prob_arr + i) = tmp_float_data;
+
+				tmp_uint8_data = *(gray_level + largest_position);
+				*(gray_level + largest_position) = *(gray_level + i);
+				*(gray_level + i) = tmp_uint8_data;
+			}
+			else
+			{
+				;
 			}
 		}
-		if (processed == 1)
+	}
+	else
+	{
+		for (i = length - 1; i > 0; i--)
 		{
-			tmp_float_data = *(prob_arr + largest_position);
-			*(prob_arr + largest_position) = *(prob_arr + i);
-			*(prob_arr + i) = tmp_float_data;
+			processed = 0;
+			largest_position = i;
+			for (j = i - 1; j >= 0; j--)
+			{
+				if (*(prob_arr + largest_position) > *(prob_arr + j))
+				{
+					largest_position = j;
+					processed = 1;
+				}
+			}
+			if (processed == 1)
+			{
+				tmp_float_data = *(prob_arr + largest_position);
+				*(prob_arr + largest_position) = *(prob_arr + i);
+				*(prob_arr + i) = tmp_float_data;
 
-			tmp_uint8_data = *(gray_level + largest_position);
-			*(gray_level + largest_position) = *(gray_level + i);
-			*(gray_level + i) = tmp_uint8_data;
-		}
-		else
-		{
-			;
+				tmp_uint8_data = *(gray_level + largest_position);
+				*(gray_level + largest_position) = *(gray_level + i);
+				*(gray_level + i) = tmp_uint8_data;
+			}
+			else
+			{
+				;
+			}
 		}
 	}
 }
@@ -1136,7 +1169,7 @@ void HuffmanEncode(const BmpImage* data_ptr,const char* save_path)
 		*(gray_index + idx_i) = idx_i;
 	}
 	free(data_arr);
-	sortCodeWithProb(prob_arr, gray_index, gray_length);
+	sortCodeWithProb(prob_arr, gray_index, gray_length,0);
 	GrayNode* node_ptr = getHuffmanTree(prob_arr, gray_index, gray_length);
 	free(gray_index); free(prob_arr);
 	Gray* huffmanEncodeTable = getHuffmanEncodeChar(node_ptr);
@@ -1161,7 +1194,7 @@ void HuffmanEncode(const BmpImage* data_ptr,const char* save_path)
 		{
 			fprintf(file_ptr, "%d,%f,%s\n", (huffmanEncodeTable + idx_i)->gray_level,
 				(huffmanEncodeTable + idx_i)->gray_prob, (huffmanEncodeTable + idx_i)->encode);
-			printf("level:%d,prob:%f,encode:%s\n", (huffmanEncodeTable + idx_i)->gray_level,
+			printf("level:%d\tprob:%f\tencode:%s\n", (huffmanEncodeTable + idx_i)->gray_level,
 				(huffmanEncodeTable + idx_i)->gray_prob, (huffmanEncodeTable + idx_i)->encode);
 		}
 		printf("\nSaved result to %s(csv/sep with ',')!!!\n", save_path);
@@ -1178,16 +1211,79 @@ void GolombEncode(const BmpImage* data_ptr, const char* save_path, const int16_t
 	uint8_t* gray_index = (uint8_t*)malloc(sizeof(uint8_t) * gray_length);
 	int16_t idx_i = gray_length - 1;
 	float_t avg_code_len = 0;
+	char* after_sort = (char*)malloc(sizeof(char) * (strlen(save_path) + 7));
+	*(after_sort) = '\0';
+	strncpy(after_sort, save_path, strlen(save_path) - 4);
+	*(after_sort + strlen(save_path) - 4) = '\0';
+	strcat(after_sort, "_sorted");
+	strncat(after_sort, save_path + strlen(save_path) - 4, 4);
 	for (idx_i; idx_i >= 0; idx_i--)
 	{
 		*(gray_index + idx_i) = idx_i;
 	}
 	free(data_arr);
-	GrayNode* node_ptr = getGolombEncode(prob_arr, gray_index, gray_length, type);
 	// before sort
-	Gray* huffmanEncodeTable = getHuffmanEncodeChar(node_ptr);
+	Gray* golombEncodeTable = getGolombEncodeChar(prob_arr,gray_index,gray_length);
+
+	for (idx_i = gray_length - 1; idx_i >= 0; idx_i--)
+	{
+		avg_code_len += (golombEncodeTable + idx_i)->gray_prob *
+			strlen((golombEncodeTable + idx_i)->encode);
+	}
+	sortEncodeWithProb(golombEncodeTable, gray_length);
+	FILE* file_ptr = fopen(save_path, "w+");
+	if (file_ptr == NULL)
+	{
+		printf("\nsomething went wrongs while saving!\n");
+	}
+	else
+	{
+
+		printf("before sort: avg code len=%f\n", avg_code_len);
+		fprintf(file_ptr, "avg code len,%f\n", avg_code_len);
+		fprintf(file_ptr, "level,prob,code\n");
+		for (idx_i = gray_length - 1; idx_i >= 0; idx_i--)
+		{
+			fprintf(file_ptr, "%d,%f,%s\n", (golombEncodeTable + idx_i)->gray_level,
+				(golombEncodeTable + idx_i)->gray_prob, (golombEncodeTable + idx_i)->encode);
+			printf("level:%d\tprob:%f\tencode:%s\n", (golombEncodeTable + idx_i)->gray_level,
+				(golombEncodeTable + idx_i)->gray_prob, (golombEncodeTable + idx_i)->encode);
+		}
+		printf("\nSaved result to %s(csv/sep with ',')!!!\n", save_path);
+	}
+	freeTable(golombEncodeTable, gray_length);
+	fclose(file_ptr);
 
 
+	sortCodeWithProb(prob_arr, gray_index, gray_length,1);
+	Gray* golombEncodeTable_after_sort = getGolombEncodeChar(prob_arr, gray_index, gray_length);
+	avg_code_len = 0;
+	for (idx_i = gray_length - 1; idx_i >= 0; idx_i--)
+	{
+		avg_code_len += (golombEncodeTable_after_sort + idx_i)->gray_prob *
+			strlen((golombEncodeTable_after_sort + idx_i)->encode);
+	}
+	sortEncodeWithProb(golombEncodeTable_after_sort, gray_length);
+	FILE* file_ptr_sorted = fopen(after_sort, "w+");
+	if (file_ptr_sorted == NULL)
+	{
+		printf("\nsomething went wrongs while saving!\n");
+	}
+	else
+	{
 
-	sortCodeWithProb(prob_arr, gray_index, gray_length);
+		printf("after sort: avg code len=%f\n", avg_code_len);
+		fprintf(file_ptr_sorted, "avg code len,%f\n", avg_code_len);
+		fprintf(file_ptr_sorted, "level,prob,code\n");
+		for (idx_i = gray_length - 1; idx_i >= 0; idx_i--)
+		{
+			fprintf(file_ptr_sorted, "%d,%f,%s\n", (golombEncodeTable_after_sort + idx_i)->gray_level,
+				(golombEncodeTable_after_sort + idx_i)->gray_prob, (golombEncodeTable_after_sort + idx_i)->encode);
+			printf("level:%d\tprob:%f\tencode:%s\n", (golombEncodeTable_after_sort + idx_i)->gray_level,
+				(golombEncodeTable_after_sort + idx_i)->gray_prob, (golombEncodeTable_after_sort + idx_i)->encode);
+		}
+		printf("\nSaved result to %s(csv/sep with ',')!!!\n", after_sort);
+	}
+	freeTable(golombEncodeTable_after_sort, gray_length);
+	fclose(file_ptr_sorted);
 }

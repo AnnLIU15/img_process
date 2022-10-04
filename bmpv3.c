@@ -9,10 +9,10 @@ int main(void)
 {
 	const char* hw1_in = "./data/lena512.bmp";
 	const char* hw1_out_huffman_code_table = "./output/lena512_huffman_table.csv"; // include avg code
-	const char* hw1_out_bicubic = "./output/lena512_bicubic.bmp";
+	const char* hw1_out_golomb_code_table = "./output/lena512_golomb_table.csv";
 	BmpImage* reader = read(hw1_in, 0);
 	// uint16_t* test_ptr = countPixelIntensity(reader);
-	HuffmanEncode(reader, hw1_out_huffman_code_table);
+	GolombEncode(reader, hw1_out_golomb_code_table,0);
 	
 	free_ptr(reader);
 }

@@ -334,3 +334,56 @@ void sortEncodeWithProb(Gray* prob_arr, const uint64_t length)
 		}
 	}
 }
+
+Gray* getGolombEncodeChar(float_t* prob_arr, uint8_t* gray_index, const int32_t length)
+{
+	Gray* golombEncodeTable = initTable(length);
+	int32_t pow_idx = 0, max_idx_iter = 0;
+	int32_t cur_idx = 0, idx_i = 0, idx_j = 0,  idx_k=0, idx_l = 0;
+	char* encode_ptr = (char*)malloc(sizeof(encode_ptr) * length >> 1);
+	char* tmp_ptr = (char*)malloc(sizeof(encode_ptr) * length >> 1);
+	const char* one_str = "1";
+	const char* zero_str = "0";
+	uint8_t is_continue = 1;
+	*(encode_ptr) = '\0';
+	strcat(encode_ptr, one_str);
+	while (is_continue == 1)
+	{
+		max_idx_iter = 1 << pow_idx;
+		for (idx_i = 0; idx_i < max_idx_iter; idx_i++)
+		{
+			strcpy(tmp_ptr, encode_ptr);
+			idx_k = idx_i;
+			for (idx_j = pow_idx-1; idx_j >= 0; idx_j--)
+			{
+				idx_l = (idx_k >> idx_j); // 目前最前面一位
+				if (idx_l == 0)
+				{
+					strcat(tmp_ptr, zero_str);
+				}
+				else
+				{
+					strcat(tmp_ptr, one_str);
+				}
+				idx_k = idx_k - (idx_l << idx_j); // 后一位
+
+			}
+			(golombEncodeTable + cur_idx)->gray_level = *(gray_index + cur_idx);
+			(golombEncodeTable + cur_idx)->gray_prob = *(prob_arr + cur_idx);
+			setEncode((golombEncodeTable + cur_idx), tmp_ptr);
+			
+			// printf("%d,%d\t%d,%d\t%s\n", *(gray_index+cur_idx), cur_idx, pow_idx, idx_i, tmp_ptr);
+			cur_idx++;
+			is_continue = cur_idx >= length ? 0 : 1;
+			if (is_continue==0)  break;
+		}
+		strcpy(tmp_ptr, encode_ptr);
+		strcpy(encode_ptr, zero_str);
+		strcat(encode_ptr, tmp_ptr);
+		pow_idx++;
+	}
+	
+
+	free(encode_ptr); free(tmp_ptr);
+	return golombEncodeTable;
+}
