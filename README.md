@@ -6,8 +6,12 @@
 
 ## Introduction of project
 
-write in the future!
+不想写
 
 # 2022秋季-音视频编解码
 
-引入matplotlib-cpp作为直方图作图
+基于本科数字图像处理的C代码继续编写
+
+| Language  | Platform  | Author | EMAIL                                                        |
+| --------- | --------- | ------ | ------------------------------------------------------------ |
+| C(VS2019) | Windows10 | ZhaoY  | [liuzhy86@mail2.sysu.edu.cn](mailto:liuzhy86@mail2.sysu.edu.cn) |
