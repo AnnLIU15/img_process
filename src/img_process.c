@@ -1187,6 +1187,7 @@ void HuffmanEncode(const BmpImage* data_ptr,const char* save_path)
 	}
 	else
 	{
+		printf("\nSaved result to %s(csv/sep with ',')!!!\n", save_path);
 		printf("avg code len=%f\n", avg_code_len);
 		fprintf(file_ptr, "avg code len,%f\n", avg_code_len);
 		fprintf(file_ptr, "level,prob,code\n");
@@ -1197,7 +1198,6 @@ void HuffmanEncode(const BmpImage* data_ptr,const char* save_path)
 			printf("level:%d\tprob:%f\tencode:%s\n", (huffmanEncodeTable + idx_i)->gray_level,
 				(huffmanEncodeTable + idx_i)->gray_prob, (huffmanEncodeTable + idx_i)->encode);
 		}
-		printf("\nSaved result to %s(csv/sep with ',')!!!\n", save_path);
 	}
 	fclose(file_ptr);
 	freeTable(huffmanEncodeTable, gray_length);
@@ -1238,7 +1238,7 @@ void GolombEncode(const BmpImage* data_ptr, const char* save_path, const int16_t
 	}
 	else
 	{
-
+		printf("\nSaved result to %s(csv/sep with ',')!!!\n", save_path);
 		printf("before sort: avg code len=%f\n", avg_code_len);
 		fprintf(file_ptr, "avg code len,%f\n", avg_code_len);
 		fprintf(file_ptr, "level,prob,code\n");
@@ -1249,7 +1249,6 @@ void GolombEncode(const BmpImage* data_ptr, const char* save_path, const int16_t
 			printf("level:%d\tprob:%f\tencode:%s\n", (golombEncodeTable + idx_i)->gray_level,
 				(golombEncodeTable + idx_i)->gray_prob, (golombEncodeTable + idx_i)->encode);
 		}
-		printf("\nSaved result to %s(csv/sep with ',')!!!\n", save_path);
 	}
 	freeTable(golombEncodeTable, gray_length);
 	fclose(file_ptr);
@@ -1271,7 +1270,7 @@ void GolombEncode(const BmpImage* data_ptr, const char* save_path, const int16_t
 	}
 	else
 	{
-
+		printf("\nSaved result to %s(csv/sep with ',')!!!\n", after_sort);
 		printf("after sort: avg code len=%f\n", avg_code_len);
 		fprintf(file_ptr_sorted, "avg code len,%f\n", avg_code_len);
 		fprintf(file_ptr_sorted, "level,prob,code\n");
@@ -1282,7 +1281,6 @@ void GolombEncode(const BmpImage* data_ptr, const char* save_path, const int16_t
 			printf("level:%d\tprob:%f\tencode:%s\n", (golombEncodeTable_after_sort + idx_i)->gray_level,
 				(golombEncodeTable_after_sort + idx_i)->gray_prob, (golombEncodeTable_after_sort + idx_i)->encode);
 		}
-		printf("\nSaved result to %s(csv/sep with ',')!!!\n", after_sort);
 	}
 	freeTable(golombEncodeTable_after_sort, gray_length);
 	fclose(file_ptr_sorted);

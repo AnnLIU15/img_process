@@ -12,6 +12,9 @@ int main(void)
 	const char* hw1_out_golomb_code_table = "./output/lena512_golomb_table.csv";
 	BmpImage* reader = read(hw1_in, 0);
 	// uint16_t* test_ptr = countPixelIntensity(reader);
+	printf("\n\nHuffman encode result:\n");
+	HuffmanEncode(reader, hw1_out_huffman_code_table);
+	printf("\n\Golomb encode result:\n");
 	GolombEncode(reader, hw1_out_golomb_code_table,0);
 	
 	free_ptr(reader);
