@@ -53,11 +53,11 @@ namespace ict_dsp
 			for (col = 3; col >= 0; col--)
 			{
 				cur_pos = (row << 2) + col;
-				if (row > 1 || col > 1)										// 低频分量，没经过shift故分布在四角
-					*(data + cur_pos) = 0;
-				else
+				if (row < 2 && col < 2)										// 低频分量在矩阵的左上角
 					*(data + cur_pos) = (int32_t)((double)(*(data + cur_pos)// 图像卷积，后续要恢复，故俩次
-						* powf(*(mat_alpha + cur_pos),2)));
+						* powf(*(mat_alpha + cur_pos), 2)));
+				else
+					*(data + cur_pos) = 0;
 			}
 		}
 		mat_mpy4x4(data, mat_H_T);											// 解码

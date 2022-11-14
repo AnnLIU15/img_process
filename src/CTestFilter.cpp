@@ -357,9 +357,10 @@ HRESULT CTestFilter::Receive(IMediaSample *pSample)
     BYTE *pSourceBuffer;
     pSample->GetPointer(&pSourceBuffer);
 
+    // ICT
+    ict_dsp::transformIct(pSourceBuffer, m_iWidth, m_iHeight);
     // IYUV --> RGB32
     CAutoLock	lck(&m_csFilter);
-    ict_dsp::transformIct(pSourceBuffer, m_iWidth, m_iHeight);
     yuv420_to_rgb32(m_pbOut, pSourceBuffer, m_iWidth, m_iHeight);
 
     // Delivery the RGB data to downstream filter
