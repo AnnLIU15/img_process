@@ -14,7 +14,7 @@
 #include <initguid.h>
 #include <dvdmedia.h>
 #include "transformIct.h"
-#include "emotionEst.h"
+#include "motionEst.h"
 #include <stdio.h>
 
 // {85FE8489-AB5A-4D18-906F-44686964DBCF}
@@ -55,11 +55,11 @@ public:
     HRESULT StartStreaming();
     HRESULT StopStreaming();
     HRESULT Receive(IMediaSample *pSample);
-    FILE* fp;       
-    int32_t frame_num;     // frame index
-    int32_t total_points;  //search points
-    int32_t total_SAD ;    // SAD
-    int32_t total_blocks;  // blocks
+    FILE*    fp;       
+    int32_t  frame_num;     // frame index
+    int32_t  total_points;  //search points
+    int32_t  total_SAD ;    // SAD
+    int32_t  total_blocks;  // blocks
     uint8_t* past_frame;   // past frame
     uint8_t* cur_frame;    // current frame
 protected:

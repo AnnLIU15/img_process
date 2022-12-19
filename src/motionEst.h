@@ -1,5 +1,5 @@
-#ifndef __EMOTIONEST_H__
-#define __EMOTIONEST_H__
+#ifndef __MOTIONEST_H__
+#define __MOTIONEST_H__
 
 #include <stdint.h>
 #include <stdio.h>
@@ -8,7 +8,7 @@
 #include <string.h>
 
 
-namespace emoEst 
+namespace moEst 
 {
 	/* Absolute Differences */
 	#define absSub(val1, val2) val1 > val2 ? val1 - val2: val2 -val1

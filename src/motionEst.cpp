@@ -1,6 +1,6 @@
-#include "emotionEst.h"
+#include "motionEst.h"
 
-namespace emoEst 
+namespace moEst 
 {
 
 	int32_t SAD(uint8_t* pSourceBuffer, uint8_t* frames, const int32_t width, const int32_t offset_x, const int32_t offset_y, const uint8_t mode)

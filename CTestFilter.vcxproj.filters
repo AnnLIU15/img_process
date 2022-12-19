@@ -23,7 +23,7 @@
     <ClCompile Include="src\CTestFilter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\emotionEst.cpp">
+    <ClCompile Include="src\motionEst.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\MediaConvert.c">
@@ -37,7 +37,7 @@
     <ClInclude Include="src\MediaConvert.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\emotionEst.h">
+    <ClInclude Include="src\motionEst.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\CTestFilter.h">

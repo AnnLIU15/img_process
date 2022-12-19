@@ -168,13 +168,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\CTestFilter.cpp" />
-    <ClCompile Include="src\emotionEst.cpp" />
+    <ClCompile Include="src\motionEst.cpp" />
     <ClCompile Include="src\MediaConvert.c" />
     <ClCompile Include="src\transformIct.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\CTestFilter.h" />
-    <ClInclude Include="src\emotionEst.h" />
+    <ClInclude Include="src\motionEst.h" />
     <ClInclude Include="src\MediaConvert.h" />
     <ClInclude Include="src\transformIct.h" />
   </ItemGroup>
