@@ -164,17 +164,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\CTestFilter.h" />
-    <ClInclude Include="src\MediaConvert.h" />
-    <ClInclude Include="src\transformIct.h" />
+    <None Include="CTestFilter.def" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\CTestFilter.cpp" />
+    <ClCompile Include="src\emotionEst.cpp" />
     <ClCompile Include="src\MediaConvert.c" />
     <ClCompile Include="src\transformIct.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="CTestFilter.def" />
+    <ClInclude Include="src\CTestFilter.h" />
+    <ClInclude Include="src\emotionEst.h" />
+    <ClInclude Include="src\MediaConvert.h" />
+    <ClInclude Include="src\transformIct.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

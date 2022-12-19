@@ -14,6 +14,7 @@
 #include "CTestFilter.h"
 #include "MediaConvert.h"
 
+
 const AMOVIESETUP_MEDIATYPE sudPinTypesIn[] =
 {
     { &MEDIATYPE_Video, &MEDIASUBTYPE_IYUV   },
@@ -40,21 +41,20 @@ const AMOVIESETUP_FILTER sudFilter =
 };
 
 //
-static WCHAR g_wszName[]     = L"Test Filter";
+static WCHAR g_wszName[] = L"Test Filter";
 
 CFactoryTemplate g_Templates[] =
 {
     { g_wszName, &CLSID_TestFilter, CTestFilter::CreateInstance, NULL, &sudFilter },
 };
 
-int g_cTemplates = sizeof(g_Templates)/sizeof(g_Templates[0]);
+int g_cTemplates = sizeof(g_Templates) / sizeof(g_Templates[0]);
 
 //
 static int filterInstances = 0;
-
 ////////////////////////////////////////////////////////////////////////
 //
-// Exported entry points for registration and unregistration
+// Exported entry points for registration and unregistration 
 // (in this case they only call through to default implementations).
 //
 ////////////////////////////////////////////////////////////////////////
@@ -89,20 +89,20 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD dwReason, LPVOID lpReserved)
 // Implements the CTestFilter class
 //
 
+
 // constructor
 CTestFilter::CTestFilter(LPUNKNOWN pUnk, HRESULT *phr) :
     CTransformFilter(L"Test Filter", pUnk, CLSID_TestFilter)
 {
-    m_iWidth            = 0;
-    m_iHeight           = 0;
+    m_iWidth = 0;
+    m_iHeight = 0;
     m_rtAvgTimePerFrame = 0;
-    m_rtStart           = 0;
-    m_rtEnd             = 0;
-
-    m_pbIn              = NULL;
-    m_pbOut             = NULL;
-    m_iInputDataSize    = 0;
-    m_iOutputDataSize   = 0;
+    m_rtStart = 0;
+    m_rtEnd = 0;
+    m_pbIn = NULL;
+    m_pbOut = NULL;
+    m_iInputDataSize = 0;
+    m_iOutputDataSize = 0;
 
     *phr = NOERROR;
 }
@@ -131,7 +131,7 @@ CTestFilter::~CTestFilter()
 //
 // Never use more than two instances of this decoder in the same application
 // Beccause of global variable problems!
-CUnknown* WINAPI CTestFilter::CreateInstance(LPUNKNOWN punk, HRESULT *phr)
+CUnknown* WINAPI CTestFilter::CreateInstance(LPUNKNOWN punk, HRESULT* phr)
 {
     if (filterInstances == 1)
     {
@@ -139,7 +139,7 @@ CUnknown* WINAPI CTestFilter::CreateInstance(LPUNKNOWN punk, HRESULT *phr)
         return NULL;
     }
 
-    CTestFilter *pNewObject = new CTestFilter(punk, phr);
+    CTestFilter* pNewObject = new CTestFilter(punk, phr);
     if (pNewObject == NULL)
     {
         *phr = E_OUTOFMEMORY;
@@ -148,7 +148,7 @@ CUnknown* WINAPI CTestFilter::CreateInstance(LPUNKNOWN punk, HRESULT *phr)
     return pNewObject;
 }
 
-HRESULT  CTestFilter::CheckInputType(const CMediaType *mtIn)
+HRESULT  CTestFilter::CheckInputType(const CMediaType* mtIn)
 {
     if (mtIn->majortype != MEDIATYPE_Video)
         return E_FAIL;
@@ -160,17 +160,17 @@ HRESULT  CTestFilter::CheckInputType(const CMediaType *mtIn)
         mtIn->cbFormat >= sizeof(VIDEOINFOHEADER) &&
         mtIn->pbFormat != NULL)
     {
-        VIDEOINFOHEADER *vih = (VIDEOINFOHEADER *)mtIn->pbFormat;
+        VIDEOINFOHEADER* vih = (VIDEOINFOHEADER*)mtIn->pbFormat;
         if (vih->bmiHeader.biWidth > MAX_WIDTH || vih->bmiHeader.biHeight > MAX_HEIGHT)
-        return E_FAIL;
+            return E_FAIL;
     }
     else if (mtIn->formattype == FORMAT_VideoInfo2 &&
-             mtIn->cbFormat >= sizeof(VIDEOINFOHEADER2) &&
-             mtIn->pbFormat != NULL)
+        mtIn->cbFormat >= sizeof(VIDEOINFOHEADER2) &&
+        mtIn->pbFormat != NULL)
     {
-        VIDEOINFOHEADER2 *vih2 = (VIDEOINFOHEADER2 *)mtIn->pbFormat;
+        VIDEOINFOHEADER2* vih2 = (VIDEOINFOHEADER2*)mtIn->pbFormat;
         if (vih2->bmiHeader.biWidth > MAX_WIDTH || vih2->bmiHeader.biHeight > MAX_HEIGHT)
-        return E_FAIL;
+            return E_FAIL;
     }
     else
     {
@@ -180,7 +180,7 @@ HRESULT  CTestFilter::CheckInputType(const CMediaType *mtIn)
     return NOERROR;
 }
 
-HRESULT  CTestFilter::CheckTransform(const CMediaType *mtIn, const CMediaType *mtOut)
+HRESULT  CTestFilter::CheckTransform(const CMediaType* mtIn, const CMediaType* mtOut)
 {
     HRESULT hr = CheckInputType(mtIn);
     if (FAILED(hr))
@@ -195,7 +195,7 @@ HRESULT  CTestFilter::CheckTransform(const CMediaType *mtIn, const CMediaType *m
     return NOERROR;
 }
 
-HRESULT CTestFilter::GetMediaType(int iPosition, CMediaType *pmt)
+HRESULT CTestFilter::GetMediaType(int iPosition, CMediaType* pmt)
 {
     CAutoLock lock(&m_csFilter);
 
@@ -210,39 +210,39 @@ HRESULT CTestFilter::GetMediaType(int iPosition, CMediaType *pmt)
     }
 
     // set Media Type
-    pmt->majortype            = MEDIATYPE_Video;
-    pmt->subtype              = MEDIASUBTYPE_RGB32;
-    pmt->bFixedSizeSamples    = TRUE;
+    pmt->majortype = MEDIATYPE_Video;
+    pmt->subtype = MEDIASUBTYPE_RGB32;
+    pmt->bFixedSizeSamples = TRUE;
     pmt->bTemporalCompression = FALSE;
-    pmt->formattype           = FORMAT_VideoInfo;
-    pmt->lSampleSize            = m_iWidth * m_iHeight * 4;
+    pmt->formattype = FORMAT_VideoInfo;
+    pmt->lSampleSize = m_iWidth * m_iHeight * 4;
 
     // append the extradata
-    VIDEOINFOHEADER *mi = (VIDEOINFOHEADER *)pmt->AllocFormatBuffer(sizeof(VIDEOINFOHEADER));
+    VIDEOINFOHEADER* mi = (VIDEOINFOHEADER*)pmt->AllocFormatBuffer(sizeof(VIDEOINFOHEADER));
     if (mi == NULL)
         return E_FAIL;
     memset(mi, 0, sizeof(VIDEOINFOHEADER));
-    mi->rcSource.left           = 0;
-    mi->rcSource.top            = 0;
-    mi->rcSource.right          = m_iWidth;
-    mi->rcSource.bottom         = m_iHeight;
-    mi->rcTarget                = mi->rcSource;
-    mi->bmiHeader.biBitCount    = 32;
+    mi->rcSource.left = 0;
+    mi->rcSource.top = 0;
+    mi->rcSource.right = m_iWidth;
+    mi->rcSource.bottom = m_iHeight;
+    mi->rcTarget = mi->rcSource;
+    mi->bmiHeader.biBitCount = 32;
     mi->bmiHeader.biCompression = BI_RGB;
-    mi->bmiHeader.biSizeImage   = m_iWidth * m_iHeight * 4;
-    mi->bmiHeader.biSize        = sizeof(BITMAPINFOHEADER);
-    mi->bmiHeader.biWidth       = m_iWidth;
-    mi->bmiHeader.biHeight      = m_iHeight;
-    mi->bmiHeader.biPlanes      = 1;
-    mi->AvgTimePerFrame         = m_rtAvgTimePerFrame;
+    mi->bmiHeader.biSizeImage = m_iWidth * m_iHeight * 4;
+    mi->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+    mi->bmiHeader.biWidth = m_iWidth;
+    mi->bmiHeader.biHeight = m_iHeight;
+    mi->bmiHeader.biPlanes = 1;
+    mi->AvgTimePerFrame = m_rtAvgTimePerFrame;
 
     return S_OK;
 }
 
-HRESULT CTestFilter::DecideBufferSize(IMemAllocator *pAlloc, ALLOCATOR_PROPERTIES *ppropInputRequest)
+HRESULT CTestFilter::DecideBufferSize(IMemAllocator* pAlloc, ALLOCATOR_PROPERTIES* ppropInputRequest)
 {
     // Is the input pin connected
-    if (! m_pInput->IsConnected())
+    if (!m_pInput->IsConnected())
     {
         return E_UNEXPECTED;
     }
@@ -251,9 +251,9 @@ HRESULT CTestFilter::DecideBufferSize(IMemAllocator *pAlloc, ALLOCATOR_PROPERTIE
     ASSERT(ppropInputRequest);
     HRESULT hr = NOERROR;
 
-    ppropInputRequest->cbBuffer  = m_iOutputDataSize;
-    ppropInputRequest->cBuffers  = 1;
-    ppropInputRequest->cbAlign   = 1;
+    ppropInputRequest->cbBuffer = m_iOutputDataSize;
+    ppropInputRequest->cBuffers = 1;
+    ppropInputRequest->cbAlign = 1;
 
     ASSERT(ppropInputRequest->cbBuffer);
 
@@ -279,27 +279,27 @@ HRESULT CTestFilter::DecideBufferSize(IMemAllocator *pAlloc, ALLOCATOR_PROPERTIE
     return NOERROR;
 }
 
-HRESULT CTestFilter::CompleteConnect(PIN_DIRECTION direction, IPin *pReceivePin)
+HRESULT CTestFilter::CompleteConnect(PIN_DIRECTION direction, IPin* pReceivePin)
 {
     if (direction == PINDIR_INPUT)
     {
         CMediaType mt = m_pInput->CurrentMediaType();
         if (mt.formattype == FORMAT_VideoInfo)
         {
-            VIDEOINFOHEADER *vih = (VIDEOINFOHEADER *)mt.pbFormat;
-            m_rtAvgTimePerFrame  = vih->AvgTimePerFrame;
-            m_iWidth             = vih->bmiHeader.biWidth;
-            m_iHeight            = abs(vih->bmiHeader.biHeight);
-            m_iInputDataSize     = m_iWidth * m_iHeight * 3 / 2;
+            VIDEOINFOHEADER* vih = (VIDEOINFOHEADER*)mt.pbFormat;
+            m_rtAvgTimePerFrame = vih->AvgTimePerFrame;
+            m_iWidth = vih->bmiHeader.biWidth;
+            m_iHeight = abs(vih->bmiHeader.biHeight);
+            m_iInputDataSize = m_iWidth * m_iHeight * 3 / 2;
             return S_OK;
         }
         else if (mt.formattype == FORMAT_VideoInfo2)
         {
-            VIDEOINFOHEADER2 *vih2 = (VIDEOINFOHEADER2 *)mt.pbFormat;
-            m_rtAvgTimePerFrame    = vih2->AvgTimePerFrame;
-            m_iWidth               = vih2->bmiHeader.biWidth;
-            m_iHeight              = abs(vih2->bmiHeader.biHeight);
-            m_iInputDataSize       = m_iWidth * m_iHeight * 3 / 2;
+            VIDEOINFOHEADER2* vih2 = (VIDEOINFOHEADER2*)mt.pbFormat;
+            m_rtAvgTimePerFrame = vih2->AvgTimePerFrame;
+            m_iWidth = vih2->bmiHeader.biWidth;
+            m_iHeight = abs(vih2->bmiHeader.biHeight);
+            m_iInputDataSize = m_iWidth * m_iHeight * 3 / 2;
             return S_OK;
         }
     }
@@ -318,11 +318,22 @@ HRESULT CTestFilter::StartStreaming()
     // Set picture id and time stamp
     m_rtStart    = 0;
     m_rtEnd      = 0;
-
+    
+    fp = fopen("./outputs/results.csv","w");
+    fprintf(fp, "frame num,avg search point nums(frame),MAD(frame)\n");
+    
+    frame_num = 0;
+    total_points = 0;
+    total_SAD = 0;
+    total_blocks = 0;
+    cur_frame = (uint8_t*)malloc(sizeof(uint8_t) * m_iWidth * m_iHeight);
+    past_frame = (uint8_t*)malloc(sizeof(uint8_t) * m_iWidth * m_iHeight);
+    memset(cur_frame, 0, sizeof(uint8_t) * m_iWidth * m_iHeight);
+    memset(past_frame, 0, sizeof(uint8_t) * m_iWidth * m_iHeight);
     m_pbOut = (BYTE *)malloc(m_iOutputDataSize);
     if (m_pbOut == NULL)
         return E_FAIL;
-
+    
     return S_OK;
 }
 
@@ -334,7 +345,10 @@ HRESULT CTestFilter::StopStreaming()
         free(m_pbOut);
         m_pbOut = NULL;
     }
-
+    fprintf(fp, "\navg search point nums(video),MAD(avg)\n");
+    fprintf(fp, "%.4f,%.4f", float(total_points) / total_blocks, float(total_SAD) / (frame_num * m_iHeight * m_iWidth));
+    fclose(fp);
+    
     return S_OK;
 }
 
@@ -343,31 +357,42 @@ HRESULT CTestFilter::Receive(IMediaSample *pSample)
     HRESULT       hr;
     IMediaSample *pOut;
     BYTE         *pOutputBuffer;
-
+    
     // Check for other streams and pass them on
     AM_SAMPLE2_PROPERTIES* const pProps = m_pInput->SampleProps();
-    if (pProps->dwStreamId != AM_STREAM_MEDIA)
+    if (pProps->dwStreamId != AM_STREAM_MEDIA) 
     {
         return m_pOutput->Deliver(pSample);
     }
-
+    
     // Receive the YUV data from source
     ASSERT(pSample);
     long lSourceSize = pSample->GetActualDataLength();
     BYTE *pSourceBuffer;
     pSample->GetPointer(&pSourceBuffer);
-
+    
     // ICT
-    ict_dsp::transformIct(pSourceBuffer, m_iWidth, m_iHeight);
+    // ict_dsp::transformIct(pSourceBuffer, m_iWidth, m_iHeight);
+
+    // sport emotion Estimation
+    // enhanced_HEXBS
+    int32_t* data = emoEst::enhanced_HEXBS(pSourceBuffer, cur_frame, past_frame, m_iWidth, m_iHeight, frame_num, fp);
+    
+    total_blocks += *data;      // blocks_frame;
+    total_SAD += *(data + 1);   //SAD_frame;
+    total_points += *(data + 2);//points_frame;
+    frame_num += 1;
+    free(data);
     // IYUV --> RGB32
     CAutoLock	lck(&m_csFilter);
     yuv420_to_rgb32(m_pbOut, pSourceBuffer, m_iWidth, m_iHeight);
-
+    
+    
     // Delivery the RGB data to downstream filter
     hr = m_pOutput->GetDeliveryBuffer(&pOut, NULL, NULL, 0);
     if (FAILED(hr))
     {
-        return hr;
+       return hr;
     }
     pOut->GetPointer(&pOutputBuffer);
     pOut->SetActualDataLength(m_iOutputDataSize);
@@ -377,7 +402,6 @@ HRESULT CTestFilter::Receive(IMediaSample *pSample)
     pOut->SetTime(&m_rtStart, &m_rtEnd);
     hr = m_pOutput->Deliver(pOut);
     pOut->Release();
-
+    
     return S_OK;
 }
-

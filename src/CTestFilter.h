@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2015, Liang Fan
-  All rights reverved.
+    Copyright (C) 2015, Liang Fan
+    All rights reverved.
 */
 
 /**	\file		CTestFilter.h
-  \brief		Header file of CTestFilter class.
+    \brief		Header file of CTestFilter class.
 */
 
 #ifndef __CTESTFILTER_H__
@@ -14,14 +14,16 @@
 #include <initguid.h>
 #include <dvdmedia.h>
 #include "transformIct.h"
+#include "emotionEst.h"
+#include <stdio.h>
 
 // {85FE8489-AB5A-4D18-906F-44686964DBCF}
-DEFINE_GUID(CLSID_TestFilter,
-    0x85fe8489, 0xab5a, 0x4d18, 0x90, 0x6f, 0x44, 0x68, 0x69, 0x64, 0xdb, 0xcf);
+DEFINE_GUID(CLSID_TestFilter, 
+0x85fe8489, 0xab5a, 0x4d18, 0x90, 0x6f, 0x44, 0x68, 0x69, 0x64, 0xdb, 0xcf);
 
 // {56555949-0000-0010-8000-00AA00389B71}
 DEFINE_GUID(MEDIASUBTYPE_IYUV,
-    0x56555949, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
+  0x56555949, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
 
 //
 #define MAX_WIDTH  1920
@@ -32,43 +34,49 @@ DEFINE_GUID(MEDIASUBTYPE_IYUV,
 //
 class CTestFilter : public CTransformFilter
 {
-    public:
-        CTestFilter(LPUNKNOWN pUnk, HRESULT *phr);
-        ~CTestFilter();
-
-        //
-        static CUnknown *WINAPI CreateInstance(LPUNKNOWN pUnk, HRESULT *phr);
-        DECLARE_IUNKNOWN;
-
-        //
-        HRESULT CheckInputType(const CMediaType *mtIn);
-        HRESULT CheckTransform(const CMediaType *mtIn, const CMediaType *mtOut);
-        HRESULT GetMediaType(int iPosition, CMediaType *pmt);
-        HRESULT DecideBufferSize(IMemAllocator *pAlloc, ALLOCATOR_PROPERTIES *ppropInputRequest);
-
-        //
-        HRESULT CompleteConnect(PIN_DIRECTION direction, IPin *pReceivePin);
-
-        //
-        HRESULT StartStreaming();
-        HRESULT StopStreaming();
-        HRESULT Receive(IMediaSample *pSample);
-
-    protected:
-        // critical section
-        CCritSec        m_csFilter;
-
-        int             m_iWidth;
-        int             m_iHeight;
-        LONGLONG        m_lPictureID;
-        REFERENCE_TIME  m_rtAvgTimePerFrame;
-        REFERENCE_TIME  m_rtStart, m_rtEnd;
-
-        //
-        BYTE           *m_pbIn;
-        BYTE           *m_pbOut;
-        int             m_iInputDataSize;
-        int             m_iOutputDataSize;
+public:
+    CTestFilter(LPUNKNOWN pUnk, HRESULT *phr);
+    ~CTestFilter();
+    
+    //
+    static CUnknown *WINAPI CreateInstance(LPUNKNOWN pUnk, HRESULT *phr);
+    DECLARE_IUNKNOWN;
+    
+    //
+    HRESULT CheckInputType(const CMediaType *mtIn);
+    HRESULT CheckTransform(const CMediaType *mtIn, const CMediaType *mtOut);
+    HRESULT GetMediaType(int iPosition, CMediaType *pmt);
+    HRESULT DecideBufferSize(IMemAllocator *pAlloc, ALLOCATOR_PROPERTIES *ppropInputRequest);
+    
+    //
+    HRESULT CompleteConnect(PIN_DIRECTION direction, IPin *pReceivePin);
+    
+    //
+    HRESULT StartStreaming();
+    HRESULT StopStreaming();
+    HRESULT Receive(IMediaSample *pSample);
+    FILE* fp;       
+    int32_t frame_num;     // frame index
+    int32_t total_points;  //search points
+    int32_t total_SAD ;    // SAD
+    int32_t total_blocks;  // blocks
+    uint8_t* past_frame;   // past frame
+    uint8_t* cur_frame;    // current frame
+protected:
+    // critical section
+    CCritSec        m_csFilter;
+    
+    int             m_iWidth;
+    int             m_iHeight;
+    LONGLONG        m_lPictureID;
+    REFERENCE_TIME  m_rtAvgTimePerFrame;
+    REFERENCE_TIME  m_rtStart, m_rtEnd;
+    
+    //
+    BYTE           *m_pbIn;
+    BYTE           *m_pbOut;
+    int             m_iInputDataSize;
+    int             m_iOutputDataSize;
 };
 
 #endif // __CTESTFILTER_H__

@@ -1,6 +1,6 @@
 /**
 * 	Copyright (C) 2015-2021, Liang Fan
-	All rights reverved.
+    All rights reverved.
 */
 
 /** \file		MediaConvert.h

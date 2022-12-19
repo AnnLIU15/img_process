@@ -15,18 +15,15 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\CTestFilter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\MediaConvert.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\transformIct.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+    <None Include="CTestFilter.def">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\CTestFilter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\emotionEst.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\MediaConvert.c">
@@ -37,8 +34,17 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="CTestFilter.def">
-      <Filter>Source Files</Filter>
-    </None>
+    <ClInclude Include="src\MediaConvert.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\emotionEst.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CTestFilter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\transformIct.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
