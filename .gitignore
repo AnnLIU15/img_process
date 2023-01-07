@@ -11,7 +11,8 @@
 *.out
 report/音视频编码.bib
 *.so
-# output/*
+output/*
+data/*
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
