@@ -17,8 +17,6 @@ data/*
 __pycache__/
 *.py[cod]
 *$py.class
-report/flow.drawio
-report/imgs
 # C extensions
 
 # Distribution / packaging
