@@ -8,7 +8,7 @@
 
 ## DirectShow初指导
 
-* 首先将梁凡老师的百度网盘文件下载下来[音视频编码技术_免费高速下载|百度网盘-分享无限制 (baidu.com)](https://pan.baidu.com/s/1xzhnCL62ZQEOejTo6Ww6EQ?pwd=s49x#list/path=%2Fsharelink360306676-712710960684375%2F音视频编码技术%2FDirectShow&parentPath=%2Fsharelink360306676-712710960684375)
+* 首先将梁凡老师的百度网盘文件下载下来
 
   ![image-20221114131523778](./assets/image-20221114131523778.png)
 
