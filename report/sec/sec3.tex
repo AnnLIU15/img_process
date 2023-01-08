@@ -48,7 +48,7 @@
     \State 使用灰度化有雾图像$I_g^c(x,y)$计算有雾图像暗通道$I_d^c(x,y)$，根据暗通道 $I_d^c(x,y)$，获取最小$pMN\dim$个像素的位置
     \State 根据有雾图像中对应的位置的像素值估计每个通道的$A_r^c$
     \State 估计传递函数$\hat t_r(x,y) = 1 - \omega \min\limits_{c\in{r,g,b}}\frac    {I_h^c(x,y)}{A_r^c}$
-    \State 对传递函数进行导向滤波$\hat t_r(x,y)$，获取最终传递函数$t_r(x,y)$
+    \State 对传递函数进行导向滤波\cite{he.tang201306}$\hat t_r(x,y)$，获取最终传递函数$t_r(x,y)$
     \State 根据大气光$A_r^c$与传递函数$t_r(x,y)$估计去雾图像$\hat I^c(x,y) = \frac{I_h^c(x,y) - A_r^c}{t} + A_r^c$
     \State \Return 去雾图像$\hat I^c(x,y)$
     \end{algorithmic}
