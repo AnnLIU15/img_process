@@ -4,7 +4,9 @@ from algo.dehazing import dehazingRaikwar, dehazingMeng, dehazingHe, dehazingCEP
 from tqdm import trange
 import cv2
 import os
-
+from skimage.metrics import structural_similarity as ssim
+from skimage.metrics import peak_signal_noise_ratio as psnr
+import numpy as np
 def main(args: argparse.ArgumentParser):
     paths = args.base_dir
     if paths == None:
@@ -20,13 +22,16 @@ def main(args: argparse.ArgumentParser):
             cur_path = paths[idx_path].replace('data','output/')     
             if not os.path.exists(cur_path):
                 os.makedirs(cur_path)
+            
             for idx, (data, name) in enumerate(zip(
                 paths_data[idx_path], paths_names[idx_path])):
                 t.set_postfix(name = name,)
                 val = dehazingRaikwar(data)
+                
                 cv2.imwrite(f'{cur_path}/R_{name}',val)
                 val = dehazingMeng(data)
-                cv2.imwrite(f'{cur_path}/M_{name}',val)
+               
+                # cv2.imwrite(f'{cur_path}/M_{name}',val)
                 val = dehazingHe(data)
                 cv2.imwrite(f'{cur_path}/H_{name}',val)
                 
@@ -34,6 +39,7 @@ def main(args: argparse.ArgumentParser):
                 cv2.imwrite(f'{cur_path}/CEPf_{name}',val)
                 val = dehazingCEP(data, is_fast = 0)
                 cv2.imwrite(f'{cur_path}/CEP_{name}',val)
+
             
              
 if __name__ == '__main__':

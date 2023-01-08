@@ -47,11 +47,12 @@ def getImage(dataset_path: str,
         pics.extend(sorted(glob(dataset_path+'/*'+pic_type)))
     pic_data = []
     pic_name = []
-    length_path = len(dataset_path)+1
+    # length_path = len(dataset_path)+1
     for pic in pics:
         pic_ = cv2.imread(pic, cv2.IMREAD_COLOR)
         # print(pic[length_path:], pic_.shape)
-        pic_data.append(pic_), pic_name.append(pic[length_path:])
+
+        pic_data.append(pic_), pic_name.append(pic.replace('\\','/').split('/')[-1])
     return pic_data, pic_name
 
 def unittest(paths):

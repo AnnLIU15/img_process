@@ -43,9 +43,10 @@ def dehazingRaikwar(hazy_img: np.ndarray,
     # minimum color channels of hazy
     I_max = np.max(min_Ih_xy)
     # equation 7
-    tr_low_bound = 1 / (1 + (
-        I_max * (10)**(-0.05 * zeta / (min_Ih_xy**0.5 + 1e-10))
-    )/(Ar_max - min_Ih_xy + 1e-10))
+    delta = zeta / (min_Ih_xy**0.5 + 1e-10)
+    
+    tr_low_bound = 1 / (1 + (I_max * (10**(-0.05 * delta)))/(
+        Ar_max - min_Ih_xy + 1e-10))
     # eq. 14
     try:
         z = np.max(np.abs(tr_low_bound[Ar_max <= min_Ih_xy]))
@@ -67,7 +68,7 @@ def dehazingRaikwar(hazy_img: np.ndarray,
                                  lambda_=1,
                                  sigma=0.5)
 
-    rt_val = deFog(normalized_img, est_tr_val, Ar, 0.95)
+    rt_val = deFog(normalized_img, est_tr_val, Ar, 0.85)
     rt_val = np.floor(rt_val * 255)
     return rt_val
 
