@@ -16,6 +16,7 @@
 #include "transformIct.h"
 #include "motionEst.h"
 #include <stdio.h>
+#include <cstdio>
 
 // {85FE8489-AB5A-4D18-906F-44686964DBCF}
 DEFINE_GUID(CLSID_TestFilter, 

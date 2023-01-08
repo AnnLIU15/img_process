@@ -2,6 +2,80 @@
 
 namespace ict_dsp
 {
+    
+
+    uint8_t transformIct_8(uint8_t* pSourceBuffer/* inout */,
+        const int32_t width/* in */, const int32_t height/* in */)
+    {
+        /* H. Qi, W. Gao, S. Ma and D. Zhao, "Adaptive Block-Size 
+        Transform Based on Extended Integer 8×8/4×4 Transforms for
+        H.264/AVC," 2006 International Conference on Image Processing
+        , 2006, pp. 1341-1344, doi: 10.1109/ICIP.2006.312582.*/
+        int32_t mat_H[64] = { 1,  1,  1,  1,  1,  1,  1,  1,
+                              1,  1,  1,  0, -0, -1, -1, -1,
+                              1,  1, -1, -1, -1, -1,  1,  1,
+                              1, -0, -1, -1,  1,  1,  0, -1,
+                              1, -1, -1,  1,  1, -1, -1,  1,
+                              1, -1,  0,  1, -1, -0,  1, -1,
+                              1, -1,  1, -1, -1,  1, -1,  1,
+                              0, -1,  1, -1,  1, -1,  1, -0 };
+
+        int32_t mat_H_T[64] = { 1,  1,  1,  1,  1,  1,  1,  0,
+                                1,  1,  1,  0, -1, -1, -1, -1,
+                                1,  1, -1, -1, -1,  0,  1,  1,
+                                1,  0, -1, -1,  1,  1, -1, -1,
+                                1,  0, -1,  1,  1, -1, -1,  1,
+                                1, -1, -1,  1, -1,  0,  1, -1,
+                                1, -1,  1,  0, -1,  1, -1,  1,
+                                1, -1,  1, -1,  1, -1,  1,  0 };
+        // S(x,y) = 1/sqrt((\sum_j H(x,j)^2)*(\sum_i H'(i,y)^2))
+        // 1/8 1/4/sqrt(3) 1/6
+        float_t a = 0.125, c = 1/6, b =0.25/sqrt(3);
+        float_t mat_alpha[64] = { a, b, a, b, a, b, a, b,
+                                  b, c, b, c, b, c, b, c,
+                                  a, b, a, b, a, b, a, b,
+                                  b, c, b, c, b, c, b, c,
+                                  a, b, a, b, a, b, a, b,
+                                  b, c, b, c, b, c, b, c,
+                                  a, b, a, b, a, b, a, b,
+                                  b, c, b, c, b, c, b, c };
+        int32_t base_pos, offset_row;				// cur_pos_idx
+        int32_t* tmp_data = new int32_t[64];		// 8 x 8 block from ICT and conv
+        const int32_t idx_height = (height >> 3);	// every 8
+        const int32_t idx_width = (width >> 3);		// every 8
+        int32_t row, col, row_idx, col_idx;
+        for (row = idx_height - 1; row >= 0; row--)
+        {
+            for (col = idx_width - 1; col >= 0; col--)
+            {
+                base_pos = (col << 3) + (row << 3) * width;
+                /* get data */
+                for (row_idx = 7; row_idx >= 0; row_idx--)
+                {
+                    offset_row = row_idx * width + base_pos;
+                    for (col_idx = 7; col_idx >= 0; col_idx--)
+                        *(tmp_data + (col_idx << 3) + row_idx) = (int32_t) * (pSourceBuffer + offset_row + col_idx);
+                }
+                compressIct8x8(tmp_data, mat_H, mat_H_T, mat_alpha);
+                /* back to matrix */
+                for (row_idx = 7; row_idx >= 0; row_idx--)
+                {
+                    offset_row = row_idx * width + base_pos;
+                    for (col_idx = 7; col_idx >= 0; col_idx--)
+                        *(pSourceBuffer + offset_row + col_idx) = (uint8_t) * (tmp_data + (col_idx << 3) + row_idx);
+                }
+            }
+        }
+        delete tmp_data; 
+        return 0;
+
+    }
+
+
+
+
+
+
     /* using the 4x4 ICT with JFCD kernel to cpmpress the data flow
      */
     uint8_t transformIct(uint8_t* pSourceBuffer/* inout */,
@@ -62,7 +136,25 @@ namespace ict_dsp
         }
         mat_mpy4x4(data, mat_H_T);											// 解码
     }
-
+    void compressIct8x8(int32_t* data/* inout */, const int32_t* mat_H/* in */,
+        const int32_t* mat_H_T/* in */, const float_t* mat_alpha/* in */)
+    {
+        int32_t row, col, cur_pos;
+        mat_mpy8x8(data, mat_H);											// 编码
+        for (row = 7; row >= 0; row--)
+        {
+            for (col = 7; col >= 0; col--)
+            {
+                cur_pos = (row << 3) + col;
+                if (row < 4 && col < 4)										// 低频分量在矩阵的左上角
+                    *(data + cur_pos) = (int32_t)((double)(*(data + cur_pos) * powf(*(mat_alpha + cur_pos), 2)));// 图像卷积，后续要恢复，故俩次
+                else
+                    *(data + cur_pos) = 0;
+            }
+        }
+        mat_mpy8x8(data, mat_H_T);											// 解码
+        
+    }
     /* Y = H * X * H'
      * data(inout): X matrix -> Y matrix
      * H(in): H matrix
@@ -90,6 +182,38 @@ namespace ict_dsp
             for (m = 3; m >= 0; m--)
             {
                 *(data + i) += *(tmp + idx + m) * *(ict_mat + (j << 2) + m);
+            }
+        }
+        delete tmp;
+    }
+
+    /* Y = H * X * H'
+     * data(inout): X matrix -> Y matrix
+     * H(in): H matrix
+     */
+    void mat_mpy8x8(int32_t* data/* inout */, const int32_t* ict_mat/* in */)
+    {
+        int32_t i, j, m, idx;
+        int32_t* tmp = new int32_t[64];
+        for (i = 63; i >= 0; i--)
+        {
+            j = i % 8;
+            idx = (i >> 3 << 3);
+            *(tmp + i) = 0;
+            for (m = 7; m >= 0; m--)
+            {
+                *(tmp + i) += *(ict_mat + idx + m) * *(data + (m << 3) + j);
+                // 可以用移位代替乘法，我认为编译器会帮我优化，并且这不是dsp不优化了
+            }
+        }
+        for (i = 63; i >= 0; i--)
+        {
+            j = i % 8;
+            idx = (i >> 3 << 3);
+            *(data + i) = 0;
+            for (m = 7; m >= 0; m--)
+            {
+                *(data + i) += *(tmp + idx + m) * *(ict_mat + (j << 3) + m);
             }
         }
         delete tmp;

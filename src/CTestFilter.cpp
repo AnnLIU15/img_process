@@ -374,16 +374,17 @@ HRESULT CTestFilter::Receive(IMediaSample *pSample)
     
     // ICT
     // ict_dsp::transformIct(pSourceBuffer, m_iWidth, m_iHeight);
-
+    // ICT 8X8
+    ict_dsp::transformIct_8(pSourceBuffer, m_iWidth, m_iHeight);
     // sport motion Estimation
     // enhanced_HEXBS
-    int32_t* data = moEst::enhanced_HEXBS(pSourceBuffer, cur_frame, past_frame, m_iWidth, m_iHeight, frame_num, fp);
-    
-    total_blocks += *data;      // blocks_frame;
-    total_SAD += *(data + 1);   //SAD_frame;
-    total_points += *(data + 2);//points_frame;
+    //int32_t* data = moEst::enhanced_HEXBS(pSourceBuffer, cur_frame, past_frame, m_iWidth, m_iHeight, frame_num, fp);
+    //
+    //total_blocks += *data;      // blocks_frame;
+    //total_SAD += *(data + 1);   //SAD_frame;
+    //total_points += *(data + 2);//points_frame;
     frame_num += 1;
-    free(data);
+    //free(data);
     // IYUV --> RGB32
     CAutoLock	lck(&m_csFilter);
     yuv420_to_rgb32(m_pbOut, pSourceBuffer, m_iWidth, m_iHeight);
