@@ -2,7 +2,46 @@
 
 namespace ict_dsp
 {
-    
+    double_t* histogram(uint8_t* pSourceBuffer/* inout */,
+        const int32_t width/* in */, const int32_t height/* in */)
+    {
+        int32_t pixel_number = width * height;
+        double_t pixel_number_inverse = 1.0 / (double_t)pixel_number;
+        double_t* gray_prob_equal = new double_t [256];
+        int32_t i, j;
+        /* initialize array */
+        memset(gray_prob_equal, 0, sizeof(double_t) * 256);
+        /* 统计概率pdf -> gray_prob p_r(r_k)=\frac{n_k}{MN}*/
+        for (i = height - 1; i >= 0; i--)
+            for (j = width - 1; j >= 0; j--)
+                *(gray_prob_equal + *(pSourceBuffer + i * width + j)) += 1;
+        for (i = 255; i >= 0; i--)
+            gray_prob_equal[i] *= pixel_number_inverse;
+        
+        return gray_prob_equal;
+    }
+
+    double_t cal_relative_rho(double_t* ori, double_t* dst, const int32_t length)
+    {
+        double_t rho = 0;
+        double_t mean_ori = 0, mean_dst = 0;    // each dim without
+        int32_t i = length - 1;
+        for (; i >= 0; i--)
+        {
+            mean_ori += *(ori + i); mean_dst += *(dst + i);
+        }
+        mean_ori /= length; mean_dst /= length;
+        double_t R1 = 0, R2 = 0, R3 = 0;
+        for (i = length - 1; i >= 0; i--)
+        {
+            R1 += (*(ori + i) - mean_ori) * (*(dst + i) - mean_dst);
+            R2 += powf((*(ori + i) - mean_ori), 2);
+            R3 += powf((*(dst + i) - mean_dst), 2);
+        }
+        rho = R1 / sqrt(R2 * R3);
+        return rho;
+    }
+
 
     uint8_t transformIct_8(uint8_t* pSourceBuffer/* inout */,
         const int32_t width/* in */, const int32_t height/* in */)

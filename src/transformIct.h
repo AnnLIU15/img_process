@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 namespace ict_dsp {
 
     #define clip4int8(val, min_val, max_val) ((val > max_val) ? max_val : ((min_val > val) ? min_val : val))
@@ -10,7 +11,9 @@ namespace ict_dsp {
     /* Api */
     uint8_t transformIct(uint8_t* pSourceBuffer, const int32_t width, const int32_t height);
     uint8_t transformIct_8(uint8_t* pSourceBuffer, const int32_t width, const int32_t height);
-
+    double_t* histogram(uint8_t* pSourceBuffer/* inout */,
+        const int32_t width/* in */, const int32_t height/* in */);
+    double_t cal_relative_rho(double_t* ori, double_t* dst, const int32_t length);
     /* DATA = H * DATA *H' */
     void mat_mpy4x4(int32_t* data, const int32_t* H);
     void mat_mpy8x8(int32_t* data, const int32_t* H);

@@ -58,6 +58,7 @@ public:
     HRESULT Receive(IMediaSample *pSample);
     FILE*    fp;       
     int32_t  frame_num;     // frame index
+    double_t* gray_prob_equal;
     int32_t  total_points;  //search points
     int32_t  total_SAD ;    // SAD
     int32_t  total_blocks;  // blocks

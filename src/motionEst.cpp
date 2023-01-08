@@ -3,7 +3,7 @@
 namespace moEst 
 {
 
-	int32_t SAD(uint8_t* pSourceBuffer, uint8_t* frames, const int32_t width, const int32_t offset_x, const int32_t offset_y, const uint8_t mode)
+	int32_t SAD(uint8_t* pSourceBuffer, uint8_t* frames, const int32_t width, const int32_t height, const int32_t offset_x, const int32_t offset_y, const int32_t mode)
 	{
 		int32_t sad = 0;
 		int32_t idx_i, idx_j;
@@ -12,15 +12,32 @@ namespace moEst
 		{
 			offset_p_x = offset_x;
 			offset_p_y = offset_y;
-		}
-		for (idx_i = 15; idx_i >= 0; idx_i--)
-		{
-			for (idx_j = 15; idx_j >= 0; idx_j--)
+			for (idx_i = 15; idx_i >= 0; idx_i--)
 			{
-				sad += absSub(*(pSourceBuffer + (offset_p_x + idx_i) * width + offset_p_y + idx_j),
-					*(frames + (offset_x + idx_i) * width + offset_y + idx_j));
+				for (idx_j = 15; idx_j >= 0; idx_j--)
+				{
+					if (offset_p_x<0 || offset_p_y<0 || (offset_p_x + 16)>height || (offset_p_y + 16)>width)
+					{
+						continue;
+					}
+					sad += absSub(*(pSourceBuffer + (offset_p_x + idx_i) * width + offset_p_y + idx_j),
+						*(frames + (offset_x + idx_i) * width + offset_y + idx_j));
+				}
+			}
+			
+		}
+		else
+		{
+			for (idx_i = 15; idx_i >= 0; idx_i--)
+			{
+				for (idx_j = 15; idx_j >= 0; idx_j--)
+				{
+					sad += absSub(*(pSourceBuffer + (offset_p_x + idx_i) * width + offset_p_y + idx_j),
+						*(frames + (offset_x + idx_i) * width + offset_y + idx_j));
+				}
 			}
 		}
+		
 		return sad;
 	}
 
@@ -94,7 +111,7 @@ namespace moEst
 				else
 				{
 					// calculate SAD
-					cur_SAD = SAD(pSourceBuffer + offset_x * width + offset_y, past_frame, width, cur_x, cur_y, 0);
+					cur_SAD = SAD(pSourceBuffer + offset_x * width + offset_y, past_frame, width, height, cur_x, cur_y, 0);
 					search_point += 1;
 
 					// get optimazed position
@@ -156,7 +173,7 @@ namespace moEst
 				else
 				{
 					// calculate SAD
-					*(SAD_for_points + idx) = SAD(pSourceBuffer + offset_x * width + offset_y, past_frame, width, cur_x, cur_y, 0);
+					*(SAD_for_points + idx) = SAD(pSourceBuffer + offset_x * width + offset_y, past_frame, width, height, cur_x, cur_y, 0);
 					search_point += 1;
 					// get the optimized position
 					if (*(SAD_for_points + idx) < min_SAD)
@@ -202,12 +219,12 @@ namespace moEst
 				{
 					blocks_frame += 1;
 					points_frame += origin_search(pSourceBuffer, past_frame, width, height, idx_row, idx_col);
-					SAD_frame += SAD(pSourceBuffer, cur_frame, width, idx_row, idx_col, 1);;
+					SAD_frame += SAD(pSourceBuffer, cur_frame, width, height, idx_row, idx_col, 1);;
 				}
 			}
-			fprintf(fp, "%d,%.4f,%.4f\n", frame_num + 1,
+			/*fprintf(fp, "%d,%.4f,%.4f\n", frame_num + 1,
 				float(points_frame) / blocks_frame,
-				float(SAD_frame) / (width * height));
+				float(SAD_frame) / (width * height));*/
 			/* block/ SAD/ points*/
 			*(data) = blocks_frame;
 			*(data + 1) = SAD_frame;

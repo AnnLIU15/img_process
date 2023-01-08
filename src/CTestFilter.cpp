@@ -321,7 +321,7 @@ HRESULT CTestFilter::StartStreaming()
     m_rtEnd      = 0;
     
     fp = fopen("./outputs/results.csv","w");
-    fprintf(fp, "frame num,avg search point nums(frame),MAD(frame)\n");
+    //fprintf(fp, "frame num,avg search point nums(frame),MAD(frame)\n");
     
     frame_num = 0;
     total_points = 0;
@@ -329,8 +329,10 @@ HRESULT CTestFilter::StartStreaming()
     total_blocks = 0;
     cur_frame = (uint8_t*)malloc(sizeof(uint8_t) * m_iWidth * m_iHeight);
     past_frame = (uint8_t*)malloc(sizeof(uint8_t) * m_iWidth * m_iHeight);
+    gray_prob_equal = (double_t*)malloc(sizeof(double_t) * m_iWidth * m_iHeight);
     memset(cur_frame, 0, sizeof(uint8_t) * m_iWidth * m_iHeight);
     memset(past_frame, 0, sizeof(uint8_t) * m_iWidth * m_iHeight);
+    memset(gray_prob_equal, 0, sizeof(double_t) * 256);
     m_pbOut = (BYTE *)malloc(m_iOutputDataSize);
     if (m_pbOut == NULL)
         return E_FAIL;
@@ -346,9 +348,9 @@ HRESULT CTestFilter::StopStreaming()
         free(m_pbOut);
         m_pbOut = NULL;
     }
-    fprintf(fp, "\navg search point nums(video),MAD(avg)\n");
+    /*fprintf(fp, "\navg search point nums(video),MAD(avg)\n");
     fprintf(fp, "%.4f,%.4f", float(total_points) / total_blocks, float(total_SAD) / (frame_num * m_iHeight * m_iWidth));
-    fclose(fp);
+    */fclose(fp);
     
     return S_OK;
 }
@@ -371,20 +373,46 @@ HRESULT CTestFilter::Receive(IMediaSample *pSample)
     long lSourceSize = pSample->GetActualDataLength();
     BYTE *pSourceBuffer;
     pSample->GetPointer(&pSourceBuffer);
+    // histogram
+    double_t* tmp = ict_dsp::histogram(pSourceBuffer, m_iWidth, m_iHeight);
+    double_t rho = 1;
+    if (frame_num > 0)
+    {
+        rho = ict_dsp::cal_relative_rho(tmp, gray_prob_equal, 256);
+        fprintf(fp, "%.6f\n", rho);
+    }
+    memcpy(gray_prob_equal,tmp, sizeof(double_t) * 256);
     
-    // ICT
-    // ict_dsp::transformIct(pSourceBuffer, m_iWidth, m_iHeight);
-    // ICT 8X8
-    ict_dsp::transformIct_8(pSourceBuffer, m_iWidth, m_iHeight);
-    // sport motion Estimation
-    // enhanced_HEXBS
-    //int32_t* data = moEst::enhanced_HEXBS(pSourceBuffer, cur_frame, past_frame, m_iWidth, m_iHeight, frame_num, fp);
-    //
-    //total_blocks += *data;      // blocks_frame;
-    //total_SAD += *(data + 1);   //SAD_frame;
-    //total_points += *(data + 2);//points_frame;
-    frame_num += 1;
-    //free(data);
+    int32_t* data;
+    delete(tmp);
+    if (frame_num == 0)    // first or change scene
+    {
+        // just store first frame(scene) copy and do nothing else 
+        data = moEst::enhanced_HEXBS(pSourceBuffer, cur_frame, past_frame, m_iWidth, m_iHeight, 0, fp);
+        // ICT 8X8
+        ict_dsp::transformIct_8(pSourceBuffer, m_iWidth, m_iHeight);
+        // Sleep(5000);
+    }
+    else                               // inter-frame code
+    {
+        // enhanced_HEXBS
+        data = moEst::enhanced_HEXBS(pSourceBuffer, cur_frame, past_frame, m_iWidth, m_iHeight, frame_num, fp);
+        //total_blocks += *data;      // blocks_frame;
+        //total_SAD += *(data + 1);   //SAD_frame;
+        //total_points += *(data + 2);//points_frame;
+        
+    }
+    /*if(frame_num == 10)
+        Sleep(50000);*/
+    if (rho > 0.8)
+    {
+        frame_num += 1;
+    }
+    else
+    {
+        frame_num = 0;
+    }
+    free(data);
     // IYUV --> RGB32
     CAutoLock	lck(&m_csFilter);
     yuv420_to_rgb32(m_pbOut, pSourceBuffer, m_iWidth, m_iHeight);

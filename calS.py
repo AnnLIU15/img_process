@@ -48,3 +48,12 @@ print(a.T)
 
 print(cal_trans(a**2).astype(int),np.unique(cal_trans(a**2)))
 
+with open('outputs/results.csv','r') as f:
+    a = f.readlines()
+    vals = []
+    for val in a:
+        val = [float(var) for var in val.split(',')[:-1]]
+        vals.append(val)
+    vals = np.array(vals)
+    
+print(np.sum(vals,axis=0),np.sum(vals,axis=1))
